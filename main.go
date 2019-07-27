@@ -9,6 +9,8 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+
+    funcs "./funcs"
 )
 
 func init() {
@@ -66,34 +68,42 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 	s.UpdateStatus(0, "Nani the Fuck")
 }
 
+
+
+
+func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
+    fmt.Println("Starting route logic")
+    for f_str, f := range funcs.FuncMap {
+        f_str_lower := strings.ToLower(f_str)
+        f_str_lower_runes := []rune(f_str_lower)
+        message_runes := []rune(message)
+
+        fmt.Println("Attempting to route func for:", f_str, f_str_lower)
+
+        if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
+            f.(func(string, *discordgo.Session, *discordgo.MessageCreate))(
+                string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
+                s,
+                m)
+        }
+    }
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	// check if the message is "!airhorn"
-	if strings.HasPrefix(m.Content, "!ping") {
-
-		// Find the channel that the message came from.
-		c, err := s.State.Channel(m.ChannelID)
-		if err != nil {
-			// Could not find channel.
-			return
-		}
-
-		_, err = s.ChannelMessageSend(c.ID, "Pong")
-		if err != nil {
-			fmt.Println("Error playing sound:", err)
-		}
+	if strings.HasPrefix(m.Content, "!") {
+        fmt.Println("Routing util command with message:", m.Content)
+        routeMessageFunc(strings.TrimLeft(m.Content, "!"), s, m)
 	}
 }
 
-// This function will be called (due to AddHandler above) every time a new
 // guild is joined.
 func guildCreate(s *discordgo.Session, event *discordgo.GuildCreate) {
 
