@@ -12,7 +12,7 @@ import (
 )
 
 func InitWebhookServer(dg *discordgo.Session) {
-	webhook_secret := os.Getenv("WEBHOOK_SERVER_SECRET")
+	webhook_secret := os.Getenv("WEBHOOK_SECRET")
 	fmt.Println(webhook_secret)
 	hook, _ := github.New(github.Options.Secret(webhook_secret))
 
