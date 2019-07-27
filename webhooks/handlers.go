@@ -56,8 +56,9 @@ func handlePushPayload(push github.PushPayload, dg *discordgo.Session) {
 			fmt.Println("Error while shortening github commit url:", err)
 		}
 
+		// TODO: Bah. Use fmt.Sprintf
 		message = message +
-				"- `" + short_sha + "`"+": "+"`" + commit.Message + "` (" + short_url + ")\n"
+			"- `" + short_sha + "`" + ": " + "`" + commit.Message + "` (" + short_url + ")\n"
 	}
 
 	message = message + "\n Don't mind me. I'm just a useless goddess anyway. :("
@@ -74,12 +75,6 @@ func handlePushPayload(push github.PushPayload, dg *discordgo.Session) {
 			}
 
 			if valid_repo {
-				//c, err := dg.State.Channel(channel_id)
-
-				//if err != nil {
-				//	fmt.Println("Error while creating channel obj:", err)
-				//}
-
 				dg.ChannelMessageSend(channel_id, message)
 			}
 		}
