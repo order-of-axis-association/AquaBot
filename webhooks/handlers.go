@@ -20,6 +20,13 @@ var AlertConfig = map[string]map[string][]string{
 			"AquaBot",
 		},
 	},
+	"602320820835975198": map[string][]string{
+		"604621897078013955": []string{
+			"AquaBot",
+			"terraform",
+			"OA_web",
+		},
+	},
 }
 
 func handlePushPayload(push github.PushPayload, dg *discordgo.Session) {
