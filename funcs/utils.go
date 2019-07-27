@@ -3,7 +3,7 @@ package funcs
 import (
     "fmt"
 
-	"github.com/bwmarrin/discordgo"
+    "github.com/bwmarrin/discordgo"
 )
 func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
     c, err := s.State.Channel(m.ChannelID)
