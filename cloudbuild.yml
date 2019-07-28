@@ -3,7 +3,7 @@ steps:
   args: [
     'build',
     '--build-arg',
-    'AQUABOT_SECRETS_KEY=${_AQUABOT_SECRETS_PEM}',
+    'AQUABOT_SECRETS_KEY=$$AQUABOT_SECRETS_PEM',
     '-t',
     'gcr.io/$PROJECT_ID/aquabot',
     '.'
@@ -12,5 +12,9 @@ steps:
   args: [
     'push',
     'gcr.io/$PROJECT_ID/aquabot',
-
   ]
+
+secrets:
+- kmsKeyName: projects/$PROJECT_ID/locations/${REGION}/keyRings/${KMS_KEY_RING_NAME}/cryptoKeys/${AQUABOT_SECRET_KMS_CRYPTO_KEY}
+  secretEnv:
+    AQUABOT_SECRETS_PEM: ${AQUABOT_SECRETS_PEM_ENC_BASE64}
