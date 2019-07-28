@@ -1,16 +1,19 @@
 FROM golang:1.8
 
+COPY . /app
+COPY /home/root/.ssh /home/root/.ssh
+
 RUN pwd
 RUN ls -al .
 RUN ls -al src
 RUN ls -al bin
 RUN ls -al /
+RUN ls -al /app
 RUN ls -al /root/.ssh
 RUN ls -al /root/.ssh/secrets
 
 RUN /bin/bash -c "source /root/.ssh/secrets/secrets.sh"
 
-COPY . /app
 WORKDIR /app
 
 RUN go get -d -v ./...
