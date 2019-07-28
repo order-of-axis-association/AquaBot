@@ -40,7 +40,7 @@ steps:
   args: [
     'build',
     '-t',
-    'gcr.io/$PROJECT_ID/aquabot',
+    'gcr.io/$PROJECT_ID/aquabot:latest',
     '.'
   ]
   volumes:
@@ -49,5 +49,5 @@ steps:
 - name: 'gc.io/cloud-builders/docker'
   args: [
     'push',
-    'gcr.io/$PROJECT_ID/aquabot',
+    'gcr.io/$PROJECT_ID/aquabot:latest',
   ]
