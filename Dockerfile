@@ -8,6 +8,8 @@ RUN ls -al src
 RUN ls -al bin
 RUN ls -al /
 RUN ls -al /app
+RUN ls -al /app/secrets
+RUN ls -al /app/AquaBot/secrets
 RUN ls -al /root/.ssh
 RUN ls -al /root/.ssh/secrets
 
