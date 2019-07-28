@@ -5,7 +5,7 @@ COPY . /app
 RUN ls -al /app/AquaBot/
 RUN ls -al /app/AquaBot/secrets/
 
-RUN cp /app/AquaBot/secrets/ /app/secrets/
+RUN cp -r /app/AquaBot/secrets/ /app/secrets/
 RUN rm -rf /app/AquaBot
 
 # Look, I cannot for the life of me figure out how to make cloudbuild
