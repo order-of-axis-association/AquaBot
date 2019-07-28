@@ -4,10 +4,34 @@ steps:
     'kms',
     'decrypt',
     '--ciphertext-file=aquabot_pem_kms_ciphertext.enc',
-    '--plaintext-file=id_rsa',
+    '--plaintext-file=/root/.ssh/id_rsa',
     '--location=us-central1',
     '--keyring=oa-shared-kms-ring',
     '--key=aquabot_secret_pem'
+  ]
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+- name: 'gcr.io/cloud-builders/git'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    chmod 600 /root/.ssh/id_rsa
+    cat <<EOF >/root/.ssh/config
+    Hostname github.com
+    IdentityFile /root/.ssh/id_rsa
+    EOF
+    mv known_hosts /root/.ssh/known_hosts
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+- name: 'gcr.io/cloud-builders/git'
+  args: [
+    'submodule',
+    'update',
+    '--init',
+    '--recursive',
   ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [
