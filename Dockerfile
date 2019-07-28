@@ -5,7 +5,7 @@ COPY . /app
 RUN ls -al /app/AquaBot/
 RUN ls -al /app/AquaBot/secrets/
 
-RUN cp -r /app/AquaBot/secrets /app/secrets/
+RUN cp -r /app/AquaBot/secrets/* /app/secrets
 RUN rm -rf /app/AquaBot
 
 RUN ls -al /app/secrets/
