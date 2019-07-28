@@ -3,7 +3,7 @@ steps:
   args: [
     'kms',
     'decrypt',
-    '--ciphertext-file=secrets/aquabot_pem_kms_ciphertext.enc',
+    '--ciphertext-file=aquabot_pem_kms_ciphertext.enc',
     '--plaintext-file=id_rsa',
     '--location=${_REGION}',
     '--keyring=${_KMS_KEY_RING_NAME}',
