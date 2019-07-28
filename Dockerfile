@@ -10,6 +10,9 @@ RUN ls -al /app/AquaBot/secrets/
 # run submodule init/updates :-/
 RUN /bin/bash -c "source /app/AquaBot/secrets/secrets.sh"
 
+RUN mkdir /root/.ssh
+RUN cp /app/AquaBot/secrets/id_rsa /root/.ssh/
+
 WORKDIR /app
 
 RUN go get -d -v ./...
