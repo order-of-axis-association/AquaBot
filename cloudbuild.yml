@@ -26,12 +26,16 @@ steps:
   - name: 'ssh'
     path: /root/.ssh
 - name: 'gcr.io/cloud-builders/git'
-  args: [
-    'submodule',
-    'update',
-    '--init',
-    '--recursive',
-  ]
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    ls -al .
+    git submodule init
+    git submodule update
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
