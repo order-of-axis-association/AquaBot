@@ -2,6 +2,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
+    '--build-arg',
+    'AQUABOT_SECRETS_KEY=${_AQUABOT_SECRETS_PEM}',
     '-t',
     'gcr.io/$PROJECT_ID/aquabot',
     '.'
