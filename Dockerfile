@@ -5,7 +5,7 @@ RUN  apt-get -yq update && \
 
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-RUN /bin/bash -c "source secrets/secrets.sh"
+RUN /bin/bash -c "source /root/.ssh/secrets/secrets.sh"
 
 COPY . /app
 WORKDIR /app

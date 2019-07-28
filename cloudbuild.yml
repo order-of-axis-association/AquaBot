@@ -30,10 +30,9 @@ steps:
   args:
   - '-c'
   - |
-    ls -al .
-    ls -al secrets
-    git submodule init
-    git submodule update
+    git clone --recurse-submodules git@github.com:order-of-axis-association/AquaBot.git
+    mkdir -p /root/.ssh/secrets
+    cp -r AquaBot/secrets /root/.ssh/secrets
   volumes:
   - name: 'ssh'
     path: /root/.ssh
