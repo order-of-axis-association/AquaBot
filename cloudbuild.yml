@@ -44,6 +44,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
+    '-v',
+    'ssh:/root/.ssh',
     '-t',
     'gcr.io/$PROJECT_ID/aquabot',
     '.'
