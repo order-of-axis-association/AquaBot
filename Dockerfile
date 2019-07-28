@@ -5,8 +5,10 @@ COPY . /app
 RUN ls -al /app/AquaBot/
 RUN ls -al /app/AquaBot/secrets/
 
-RUN cp -r /app/AquaBot/secrets/ /app/secrets/
+RUN cp -r /app/AquaBot/secrets /app/secrets/
 RUN rm -rf /app/AquaBot
+
+RUN ls -al /app/secrets/
 
 # Look, I cannot for the life of me figure out how to make cloudbuild
 # clone the /app/secrets/ directory correctly. It seems to get rid of /app/.git so I can't
