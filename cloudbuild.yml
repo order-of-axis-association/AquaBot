@@ -44,6 +44,9 @@ steps:
     'gcr.io/$PROJECT_ID/aquabot',
     '.'
   ]
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
 - name: 'gc.io/cloud-builders/docker'
   args: [
     'push',
