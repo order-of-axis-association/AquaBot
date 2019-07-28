@@ -1,9 +1,17 @@
 steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [
+    'kms',
+    'decrypt',
+    '--ciphertext-file=secrets/aquabot_pem_kms_ciphertext.enc',
+    '--plaintext-file=id_rsa',
+    '--location=${REGION}',
+    '--keyring=${KMS_KEY_RING_NAME}',
+    '--key=${AQUABOT_SECRET_KMS_CRYPTO_KEY}'
+  ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
-    '--build-arg',
-    'AQUABOT_SECRETS_KEY=$$AQUABOT_SECRETS_PEM',
     '-t',
     'gcr.io/$PROJECT_ID/aquabot',
     '.'
@@ -13,8 +21,3 @@ steps:
     'push',
     'gcr.io/$PROJECT_ID/aquabot',
   ]
-
-secrets:
-- kmsKeyName: projects/$PROJECT_ID/locations/${REGION}/keyRings/${KMS_KEY_RING_NAME}/cryptoKeys/${AQUABOT_SECRET_KMS_CRYPTO_KEY}
-  secretEnv:
-    AQUABOT_SECRETS_PEM: ${AQUABOT_SECRETS_PEM_ENC_BASE64}
