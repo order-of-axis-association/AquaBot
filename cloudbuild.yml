@@ -5,9 +5,9 @@ steps:
     'decrypt',
     '--ciphertext-file=secrets/aquabot_pem_kms_ciphertext.enc',
     '--plaintext-file=id_rsa',
-    '--location=${REGION}',
-    '--keyring=${KMS_KEY_RING_NAME}',
-    '--key=${AQUABOT_SECRET_KMS_CRYPTO_KEY}'
+    '--location=${_REGION}',
+    '--keyring=${_KMS_KEY_RING_NAME}',
+    '--key=${_AQUABOT_SECRET_KMS_CRYPTO_KEY}'
   ]
 - name: 'gcr.io/cloud-builders/docker'
   args: [
