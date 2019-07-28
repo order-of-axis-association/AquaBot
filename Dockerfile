@@ -1,7 +1,6 @@
 FROM golang:1.8
 
 COPY . /app
-COPY /home/root/.ssh /home/root/.ssh
 
 RUN pwd
 RUN ls -al .
