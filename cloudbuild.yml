@@ -30,6 +30,7 @@ steps:
   args:
   - '-c'
   - |
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
     git clone --recurse-submodules git@github.com:order-of-axis-association/AquaBot.git
     mkdir -p /root/.ssh/secrets
     cp -r AquaBot/secrets /root/.ssh/secrets
