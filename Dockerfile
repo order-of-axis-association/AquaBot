@@ -12,6 +12,7 @@ RUN /bin/bash -c "source /app/AquaBot/secrets/secrets.sh"
 
 RUN mkdir /root/.ssh
 RUN cp /app/AquaBot/secrets/id_rsa /root/.ssh/
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 WORKDIR /app
 
