@@ -32,12 +32,6 @@ steps:
   - |
     ssh-keyscan github.com >> /root/.ssh/known_hosts
     git clone --recurse-submodules git@github.com:order-of-axis-association/AquaBot.git
-    mkdir -p /root/.ssh/secrets
-    cp -r AquaBot/secrets /root/.ssh/
-    ls -al AquaBot/
-    ls -al AquaBot/secrets
-    ls -al /root/.ssh
-    ls -al /root/.ssh/secrets
   volumes:
   - name: 'ssh'
     path: /root/.ssh

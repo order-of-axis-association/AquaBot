@@ -2,18 +2,13 @@ FROM golang:1.8
 
 COPY . /app
 
-RUN pwd
-RUN ls -al .
-RUN ls -al src
-RUN ls -al bin
-RUN ls -al /
-RUN ls -al /app
-RUN ls -al /app/secrets
-RUN ls -al /app/AquaBot/secrets
-RUN ls -al /root/.ssh
-RUN ls -al /root/.ssh/secrets
+RUN ls -al /app/AquaBot/
+RUN ls -al /app/AquaBot/secrets/
 
-RUN /bin/bash -c "source /root/.ssh/secrets/secrets.sh"
+# Look, I cannot for the life of me figure out how to make cloudbuild
+# clone the /app/secrets/ directory correctly. It seems to get rid of /app/.git so I can't
+# run submodule init/updates :-/
+RUN /bin/bash -c "source /app/AquaBot/secrets/secrets.sh"
 
 WORKDIR /app
 
