@@ -77,6 +77,8 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 		status = "Nani the Fuck"
 	}
 
+	fmt.Println("Setting status to: ", status)
+
 	// Set the playing status.
 	s.UpdateStatus(0, status)
 }
