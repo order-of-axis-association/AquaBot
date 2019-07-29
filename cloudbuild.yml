@@ -39,6 +39,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
+    '--build-arg',
+    'REPO_REVISION=$SHORT_SHA',
     '-t',
     'gcr.io/$PROJECT_ID/aquabot:latest',
     '.'

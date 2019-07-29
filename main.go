@@ -69,8 +69,16 @@ func main() {
 // the "ready" event from Discord.
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 
+	status := os.Getenv("REPO_REVISION")
+
+	if status != "" {
+		status = "Running on SHA: " + status
+	} else {
+		status = "Nani the Fuck"
+	}
+
 	// Set the playing status.
-	s.UpdateStatus(0, "Nani the Fuck")
+	s.UpdateStatus(0, status)
 }
 
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
