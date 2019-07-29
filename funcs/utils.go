@@ -19,6 +19,19 @@ func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
+	c, err := s.State.Channel(m.ChannelID)
+	if err != nil {
+		// Could not find channel.
+		return
+	}
+
+	_, err = s.ChannelMessageSend(c.ID, "Ping")
+	if err != nil {
+		fmt.Println("Error sending message:", err)
+	}
+}
+
 func Help(args string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {

@@ -46,4 +46,15 @@ steps:
   volumes:
   - name: 'ssh'
     path: /root/.ssh
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [
+    'compute',
+    'instances',
+    'reset',
+    'oa-aquabot',
+    '--zone',
+    'us-central1-a',
+    '--project',
+    'oa-aquabot'
+  ]
 images: ['gcr.io/$PROJECT_ID/aquabot:latest']
