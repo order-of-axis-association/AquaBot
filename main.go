@@ -69,7 +69,11 @@ func main() {
 // the "ready" event from Discord.
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 
-	status := os.Getenv("REPO_REVISION")
+	sha, err := ioutil.ReadFile("secrets/repo_revision")
+	if err != nil {
+		fmt.Println("Error opening secrets/repo_revision")
+	}
+	status := string(sha)
 
 	if status != "" {
 		status = "Running on SHA: " + status
