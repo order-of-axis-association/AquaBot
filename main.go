@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"io/ioutil"
 	"strings"
 	"syscall"
 
