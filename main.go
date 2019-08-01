@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"io/ioutil"
 	"strings"
 	"syscall"
 
@@ -69,12 +68,7 @@ func main() {
 // This function will be called (due to AddHandler above) when the bot receives
 // the "ready" event from Discord.
 func ready(s *discordgo.Session, event *discordgo.Ready) {
-
-	sha, err := ioutil.ReadFile("secrets/repo_revision")
-	if err != nil {
-		fmt.Println("Error opening secrets/repo_revision")
-	}
-	status := string(sha)
+	status := os.Getenv("COMMIT_SHA")
 
 	if status != "" {
 		status = "Running on SHA: " + status
