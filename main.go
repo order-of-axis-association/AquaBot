@@ -10,6 +10,10 @@ import (
 	"regexp"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	"github.com/order-of-axis-association/AquaBot/db"
 
 	"github.com/order-of-axis-association/AquaBot/funcs"
 	"github.com/order-of-axis-association/AquaBot/triggers"
@@ -20,6 +24,10 @@ func init() {
 	flag.StringVar(&token, "t", "", "Bot Token")
 	flag.Parse()
 }
+
+var global_state = struct {
+	dbconn	*gorm.DB
+}{}
 
 var token string
 var buffer = make([][]byte, 0)
@@ -56,6 +64,13 @@ func main() {
 	// Start github webhook listener server
 
 	go webhooks.InitWebhookServer(dg)
+
+	dsn := db.BuildCloudSQLDSN()
+	gorm_db, err := gorm.Open("mysql", dsn)
+	global_state.dbconn = gorm_db
+	fmt.Println("DB err: ", err)
+	fmt.Println("dbconn: %+v", global_state.dbconn)
+
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Aqua is now running.  Press CTRL-C to exit.")

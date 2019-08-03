@@ -1,5 +1,6 @@
 GOCMD=go
 GOBUILD=$(GOCMD) build
+GOGET=$(GOCMD) get
 
 BINARY_PATH=bin/
 BINARY_NAME=aqua
@@ -7,4 +8,5 @@ BINARY_FULL_PATH=$(BINARY_PATH)$(BINARY_NAME)
 
 all: build
 build:
+	$(GOGET) -d ./...
 	$(GOBUILD) -o $(BINARY_FULL_PATH) main.go
