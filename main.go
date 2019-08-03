@@ -7,10 +7,12 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"regexp"
 
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/order-of-axis-association/AquaBot/funcs"
+	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/webhooks"
 )
 
@@ -100,6 +102,22 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 	}
 }
 
+func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
+	fmt.Println("Seeing if message applies to any auto-react triggers")
+
+	var re *regexp.Regexp
+
+	for regex, f := range triggers.FuncMap {
+		re = regexp.MustCompile(regex)
+		if (re.MatchString(message)) {
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate)) (
+				message,
+				s,
+				m)
+		}
+	}
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -109,10 +127,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Util commands
 	if strings.HasPrefix(m.Content, "!") {
 		fmt.Println("Routing util command with message:", m.Content)
 		routeMessageFunc(strings.TrimLeft(m.Content, "!"), s, m)
 	}
+
+	// See if message triggers any of the autotriggers
+	routeAutoTriggers(m.Content, s, m)
+
 }
 
 // guild is joined.
