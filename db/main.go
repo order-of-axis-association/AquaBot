@@ -3,8 +3,7 @@ package db
 import (
 	"fmt"
 	"io/ioutil"
-
-	//"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -13,6 +12,10 @@ type DBConfig struct {
 	Password	string
 	DBName		string
 	Host		string
+}
+
+type G_State struct {
+	DBConn *gorm.DB
 }
 
 var config_loc string = "secrets/db_config.yml"
@@ -39,6 +42,15 @@ func BuildCloudSQLDSN() string {
 	return dsn
 }
 
-func Migrate() {
-	
+func Migrate(global_state G_State) {
+	fmt.Println("%+v", global_state)
+	g_db := global_state.DBConn
+
+	g_db.AutoMigrate(&Server{})
+	g_db.AutoMigrate(&Channel{})
+	g_db.AutoMigrate(&User{})
+	g_db.AutoMigrate(&Reminder{})
+	g_db.AutoMigrate(&Todo{})
+	g_db.AutoMigrate(&Config{})
+
 }

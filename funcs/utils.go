@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
@@ -19,7 +19,7 @@ func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
@@ -32,7 +32,7 @@ func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func Help(args string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func Help(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		fmt.Println("Could not find channel.")

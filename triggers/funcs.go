@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func UselessAqua(args string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func UselessAqua(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
 	fmt.Println("Here")
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {

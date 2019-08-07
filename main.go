@@ -25,9 +25,11 @@ func init() {
 	flag.Parse()
 }
 
-var global_state = struct {
-	dbconn	*gorm.DB
-}{}
+type G_State struct {
+	dbconn *gorm.DB
+}
+
+var global_state = db.G_State{}
 
 var token string
 var buffer = make([][]byte, 0)
@@ -67,10 +69,11 @@ func main() {
 
 	dsn := db.BuildCloudSQLDSN()
 	gorm_db, err := gorm.Open("mysql", dsn)
-	global_state.dbconn = gorm_db
+	global_state.DBConn = gorm_db
 	fmt.Println("DB err: ", err)
-	fmt.Println("dbconn: %+v", global_state.dbconn)
+	fmt.Println("dbconn: %+v", global_state.DBConn)
 
+	db.Migrate(global_state)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Aqua is now running.  Press CTRL-C to exit.")
@@ -109,10 +112,11 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 		fmt.Println("Attempting to route func for:", f_str, f_str_lower)
 
 		if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate))(
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, interface{}))(
 				string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
 				s,
-				m)
+				m,
+				global_state)
 		}
 	}
 }
@@ -125,10 +129,11 @@ func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.Messag
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
 		if (re.MatchString(message)) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate)) (
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, interface{})) (
 				message,
 				s,
-				m)
+				m,
+				global_state)
 		}
 	}
 }
@@ -150,7 +155,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// See if message triggers any of the autotriggers
 	routeAutoTriggers(m.Content, s, m)
-
 }
 
 // guild is joined.
