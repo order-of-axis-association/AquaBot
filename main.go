@@ -13,6 +13,9 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
+
+	"github.com/order-of-axis-association/AquaBot/types"
+
 	"github.com/order-of-axis-association/AquaBot/db"
 
 	"github.com/order-of-axis-association/AquaBot/funcs"
@@ -25,11 +28,7 @@ func init() {
 	flag.Parse()
 }
 
-type G_State struct {
-	dbconn *gorm.DB
-}
-
-var global_state = db.G_State{}
+var global_state = types.G_State{}
 
 var token string
 var buffer = make([][]byte, 0)
@@ -112,7 +111,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 		fmt.Println("Attempting to route func for:", f_str, f_str_lower)
 
 		if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, interface{}))(
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
 				string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
 				s,
 				m,
@@ -129,7 +128,7 @@ func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.Messag
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
 		if (re.MatchString(message)) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, interface{})) (
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State)) (
 				message,
 				s,
 				m,

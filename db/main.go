@@ -3,20 +3,12 @@ package db
 import (
 	"fmt"
 	"io/ioutil"
-	"github.com/jinzhu/gorm"
+
+	"github.com/order-of-axis-association/AquaBot/types"
+
+	_ "github.com/jinzhu/gorm"
 	"gopkg.in/yaml.v2"
 )
-
-type DBConfig struct {
-	User		string
-	Password	string
-	DBName		string
-	Host		string
-}
-
-type G_State struct {
-	DBConn *gorm.DB
-}
 
 var config_loc string = "secrets/db_config.yml"
 var dsn_fmt string = "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=America%%2FNew_York"
@@ -27,7 +19,7 @@ func BuildCloudSQLDSN() string {
 		fmt.Println("Could not read db_config.yml file: ", err)
 	}
 
-	config := DBConfig{}
+	config := types.DBConfig{}
 
 	err = yaml.Unmarshal([]byte(config_raw), &config)
 	if err != nil {
@@ -42,7 +34,7 @@ func BuildCloudSQLDSN() string {
 	return dsn
 }
 
-func Migrate(global_state G_State) {
+func Migrate(global_state types.G_State) {
 	fmt.Println("%+v", global_state)
 	g_db := global_state.DBConn
 
@@ -52,5 +44,7 @@ func Migrate(global_state G_State) {
 	g_db.AutoMigrate(&Reminder{})
 	g_db.AutoMigrate(&Todo{})
 	g_db.AutoMigrate(&Config{})
+
+	fmt.Println("Done migrating.")
 
 }
