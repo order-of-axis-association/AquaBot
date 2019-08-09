@@ -5,4 +5,5 @@ var FuncMap = map[string]interface{}{
 	"ping": Ping,
 	"pong": Pong,
 	"help": Help,
+	"todo": Todo,
 }

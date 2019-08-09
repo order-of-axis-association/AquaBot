@@ -18,6 +18,7 @@ import (
 
 	"github.com/order-of-axis-association/AquaBot/db"
 
+	"github.com/order-of-axis-association/AquaBot/admin"
 	"github.com/order-of-axis-association/AquaBot/funcs"
 	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/webhooks"
@@ -101,25 +102,39 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 	s.UpdateStatus(0, status)
 }
 
+// These funcs are meant to be "real" functionality of the bot
+// where invocation requires prepending the entire message with a !
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println("Starting route logic")
-	for f_str, f := range funcs.FuncMap {
-		f_str_lower := strings.ToLower(f_str)
-		f_str_lower_runes := []rune(f_str_lower)
-		message_runes := []rune(message)
 
-		fmt.Println("Attempting to route func for:", f_str, f_str_lower)
+	func_maps := []map[string]interface{}{
+		funcs.FuncMap,
+		admin.FuncMap,
+	}
 
-		if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
-				string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
-				s,
-				m,
-				global_state)
+	for _, func_map := range func_maps {
+		for f_str, f := range func_map {
+			f_str_lower := strings.ToLower(f_str)
+			f_str_lower_runes := []rune(f_str_lower)
+			message_runes := []rune(message)
+
+			fmt.Println("Attempting to route func for:", f_str, f_str_lower)
+
+			if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
+				f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
+					string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
+					s,
+					m,
+					global_state)
+			}
 		}
 	}
 }
 
+// Autotriggers are separate from regular bot "functions".
+// Autotriggers are meant to be lightweight and "fun" things that react
+// to certain regexes in messages - regardless of whether there was a ! at the beginning of the command.
+// Eg, one func is triggers.UselessAqua which just adds an emote to any message that has "useless" or "aqua" in it.
 func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println("Seeing if message applies to any auto-react triggers")
 
@@ -140,6 +155,13 @@ func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.Messag
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	// Imports will import new records into db so we have a corresponding match
+	// These do nothing beyond ensuring a single record exists in the DB for each corresponding entity.
+	db.ImportGuild(m.GuildID, global_state)
+	db.ImportChannel(m.ChannelID, global_state)
+	db.ImportUser(m.Author, global_state)
+	db.ImportUsers(m.Mentions, global_state)
+
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
 	if m.Author.ID == s.State.User.ID {

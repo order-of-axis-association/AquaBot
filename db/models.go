@@ -27,6 +27,9 @@ type User struct {
 	gorm.Model
 
 	UserId		int
+	Username	string
+	Descriminator string // The 4 numbers after the discord name
+	Bot			bool
 }
 
 type Reminder struct {

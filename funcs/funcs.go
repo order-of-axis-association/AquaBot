@@ -3,10 +3,12 @@ package funcs
 import (
 	"fmt"
 
+	"github.com/order-of-axis-association/AquaBot/types"
+
 	"github.com/bwmarrin/discordgo"
 )
 
-func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
+func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
@@ -19,7 +21,7 @@ func Ping(input string, s *discordgo.Session, m *discordgo.MessageCreate, global
 	}
 }
 
-func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
+func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
@@ -32,7 +34,7 @@ func Pong(input string, s *discordgo.Session, m *discordgo.MessageCreate, global
 	}
 }
 
-func Help(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
+func Help(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		fmt.Println("Could not find channel.")
