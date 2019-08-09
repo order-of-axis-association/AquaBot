@@ -2,11 +2,11 @@ package triggers
 
 import (
 	"fmt"
-
+	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/bwmarrin/discordgo"
 )
 
-func UselessAqua(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state interface{}) {
+func UselessAqua(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
 	fmt.Println("Here")
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {

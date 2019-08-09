@@ -22,23 +22,23 @@ func ImportGuild (guild_id_s string, g_state types.G_State) {
 	server := Server{ServerId: guild_id}
 	if result := db.NewRecord(server); result {
 		//db.Create(&server)
-		fmt.Println("Created new Server record for",guild_id)
+		//fmt.Println("Created new Server record for",guild_id)
 	}
-	fmt.Println("Server record already existed")
+	//fmt.Println("Server record already existed")
 
 	var serv Server
 	if err := db.Where("server_id = ?", guild_id).First(&serv); err != nil {
 		fmt.Println("Could not find server by", guild_id)
 	}
 
-	fmt.Println("%+v", serv)
+	//fmt.Println("%+v", serv)
 
-	fmt.Println("AAAAAAAAAAAA")
-	var servs []Server
-	db.Find(&servs)
-	for _, serv := range servs {
-		fmt.Println("%+v", serv)
-	}
+	//fmt.Println("AAAAAAAAAAAA")
+	//var servs []Server
+	//db.Find(&servs)
+	//for _, serv := range servs {
+		//fmt.Println("%+v", serv)
+	//}
 	fmt.Println("Done")
 
 }

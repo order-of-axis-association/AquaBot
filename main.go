@@ -116,7 +116,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 	for _, func_map := range func_maps {
 		for f_str, f := range func_map {
 
-			//argparse.ParseCommandString(message)
+			argparse.ParseCommandString(message)
 
 			f_str_lower := strings.ToLower(f_str)
 			f_str_lower_runes := []rune(f_str_lower)
