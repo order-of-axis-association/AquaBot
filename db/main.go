@@ -2,7 +2,12 @@ package db
 
 import (
 	"fmt"
+	"time"
 	"io/ioutil"
+
+	"github.com/go-sql-driver/mysql"
+	"crypto/x509"
+	"crypto/tls"
 
 	"github.com/order-of-axis-association/AquaBot/types"
 
@@ -11,7 +16,40 @@ import (
 )
 
 var config_loc string = "secrets/db_config.yml"
-var dsn_fmt string = "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=America%%2FNew_York"
+
+var ca_cert_path string = "secrets/server-ca.pem"
+var client_cert_path string = "secrets/client-cert.pem"
+var client_key_path string = "secrets/client-key.pem"
+
+var cloud_sql_server_name string = "oa-aquabot:aquabot-master"
+
+var tls_config_name string = "custom"
+var new_york_location string = "America/New_York"
+
+func registerAquabotTLSConfig() {
+	root_cert_pool := x509.NewCertPool()
+	pem, err := ioutil.ReadFile(ca_cert_path)
+	if err != nil {
+		fmt.Println("Could not read ca-cert.pem:", err)
+	}
+	if ok := root_cert_pool.AppendCertsFromPEM(pem); !ok {
+		fmt.Println("Failed to append PEM.")
+	}
+
+	client_cert := make([]tls.Certificate, 0, 1)
+	certs, err := tls.LoadX509KeyPair(client_cert_path, client_key_path)
+	if err != nil {
+		fmt.Println("Could not load X509 Keypair:", err)
+	}
+
+	client_cert = append(client_cert, certs)
+
+	mysql.RegisterTLSConfig(tls_config_name, &tls.Config{
+		RootCAs:		root_cert_pool,
+		Certificates:	client_cert,
+		ServerName:		cloud_sql_server_name,
+	})
+}
 
 func BuildCloudSQLDSN() string {
 	config_raw, err := ioutil.ReadFile(config_loc)
@@ -28,7 +66,31 @@ func BuildCloudSQLDSN() string {
 
 	fmt.Println("%+v", config)
 
-	dsn := fmt.Sprintf(dsn_fmt, config.User, config.Password, config.Host, config.DBName)
+	registerAquabotTLSConfig()
+
+	new_york_loc, err := time.LoadLocation(new_york_location)
+	if err != nil {
+		fmt.Println("Could not load America/New_York location!:", err)
+	}
+
+	cfg := mysql.Config{
+		User:	config.User,
+		Passwd: config.Password,
+		Addr:	config.Host+":3306",
+		Net:	"tcp",
+		DBName:	config.DBName,
+		Loc:	new_york_loc,
+		AllowNativePasswords: true,
+
+		ParseTime:	true,
+
+		TLSConfig:	tls_config_name,
+	}
+
+	dsn := cfg.FormatDSN()
+	fmt.Println(dsn)
+
+	dsn = dsn + "&charset=utf8mb4" // Lol the mysql config source code literally doesn't have logic for a charset option
 
 	fmt.Println(dsn)
 	return dsn
