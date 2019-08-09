@@ -21,7 +21,7 @@ func ImportGuild (guild_id_s string, g_state types.G_State) {
 
 	server := Server{ServerId: guild_id}
 	if result := db.NewRecord(server); result {
-		db.Create(&server)
+		//db.Create(&server)
 		fmt.Println("Created new Server record for",guild_id)
 	}
 	fmt.Println("Server record already existed")
