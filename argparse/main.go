@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"regexp"
+	"errors"
 
 	"github.com/order-of-axis-association/AquaBot/types"
 )
@@ -14,11 +15,13 @@ import (
 // Parses out types.CmdArgs
 // Must provide all positional args BEFORE args with flags.
 // Eg,
-// mycmd arg1 arg2 arg3 --myflag somevalue <= VALID
-// mycmd --myflag somevalue				   <= VALID
-// mycmd arg1							   <= VALID
-// mycmd arg1 arg2 --myflag somevalue arg3 <= INVALID
-func ParseCommandString(cmd string) types.CmdArgs {
+// mycmd arg1 arg2 arg3 --myflag somevalue	<= VALID
+// mycmd --myflag somevalue					<= VALID
+// mycmd arg1								<= VALID
+// mycmd arg1 arg2 --myflag somevalue arg3	<= INVALID
+//
+// NOTE: If no FlagConfig is found for a command, all args will be DISCARDED (Original message can be found in CmdArgs.OrigMsg
+func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArgs, error) {
 	// NOTE: This func is gonna get fucky if you give unicode args.
 	// Should probably account for those.
 
@@ -38,6 +41,7 @@ func ParseCommandString(cmd string) types.CmdArgs {
 
 	cmd_args := types.CmdArgs{
 		Cmd: cmd_name,
+		OrigMsg: cmd,
 	}
 
 	if len(cmd_rem) > 0 {
@@ -57,24 +61,57 @@ func ParseCommandString(cmd string) types.CmdArgs {
 			flagged_args = make([]rune, 0)
 		}
 
-		fmt.Println("Positional args:", string(positional_args))
-		fmt.Println("Flagged args:", string(flagged_args))
-
 		parsed_positional_args := parsePositionalArgs(positional_args)
-		parsed_flagged_args := parseFlaggedArgs(flagged_args)
-		short_flagged_args := parsed_flagged_args["short"]
-		long_flagged_args := parsed_flagged_args["long"]
-
-		fmt.Println("%+v", parsed_positional_args)
-		fmt.Println("%+v", short_flagged_args)
-		fmt.Println("%+v", long_flagged_args)
+		short_flagged_args, long_flagged_args, err := parseFlaggedArgs(flagged_args)
+		if err != nil {
+			msg := fmt.Sprintln("Could not parse flagged args:", err)
+			fmt.Println(msg)
+			return types.CmdArgs{}, errors.New(msg)
+		}
 
 		cmd_args.PosArgs = parsed_positional_args
-		cmd_args.ShortFlagArgs = short_flagged_args
-		cmd_args.LongFlagArgs = long_flagged_args
+
+		if len(flag_config) > 0 {
+			cmd_args.FlagArgs, err = processFlagConfig(short_flagged_args, long_flagged_args, flag_config)
+			if err != nil {
+				msg := fmt.Sprintln("Could not unify flags with config:", err)
+				fmt.Println(msg)
+				return types.CmdArgs{}, errors.New(msg)
+			}
+		}
 	}
 
-	return cmd_args
+	return cmd_args, nil
+}
+
+// This function takes the cmd_args.ShortFlagArgs and cmd_argsLongFlagArgs
+// and using the input config, will map both short and long vals to FlagArgs
+// The input config should be a map of short flag to long flag, eg
+// [ "f": "full", "h": "help", "c": "commit" ], etc etc
+// This also means this function will throw an error if both the short and long
+// versions of the flag are set, eg if the command had "!cmd -c 'abc12345' --commit '12345abc'"
+func processFlagConfig(short_flags map[string]string, long_flags map[string]string, config map[string]string) (map[string]string, error) {
+	flag_args := make(map[string]string)
+
+	for short_flag, long_flag := range config {
+		if short_val, exists := short_flags[short_flag]; exists {
+			flag_args[short_flag] = short_val
+			flag_args[long_flag] = short_val
+		}
+		if long_val, exists := long_flags[long_flag]; exists {
+			if val, exists := flag_args[short_flag]; exists {
+				// If we already saw a short_flag, then we would have set both short and long flag keys, so just check one of them.
+				msg := fmt.Sprintf("Both a short and long flag were set for the same flag! Short:", short_flag, "short_val:", val, "Long:", long_flag, "long_val:", long_val)
+				fmt.Println(msg)
+				return make(map[string]string), errors.New(msg)
+			}
+
+			flag_args[short_flag] = long_val
+			flag_args[long_flag] = long_val
+		}
+	}
+
+	return flag_args, nil
 }
 
 func parsePositionalArgs(cmd_rem []rune) map[int]string {
@@ -100,10 +137,7 @@ func parsePositionalArgs(cmd_rem []rune) map[int]string {
 // - - Non-quoted string with no spaces
 // - - Single OR double quoted string, spaces allowed.
 // - - - Quoted strings can contain the "other" type of quote inside the quote. Eg, "string with ' single quote"
-func parseFlaggedArgs(cmd_rem []rune) map[string]map[string]string {
-	fmt.Println("-------")
-	fmt.Println("======= Attempting to parse flagged args")
-	fmt.Println("-------")
+func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, error) {
 	// Oof lmao. Maybe I should split this into regular code and not regex.
 	re := regexp.MustCompile(`(?:(?P<shortarg>-[a-zA-Z])(?:[ =](?P<shortvalue>[^- '"]+|'[^']+'|"[^"]+")?)|(?P<longarg>--[a-zA-Z-]+)=(?P<longvalue>[^- '"]+|'[^']+'|"[^"]+"))`)
 
@@ -111,15 +145,13 @@ func parseFlaggedArgs(cmd_rem []rune) map[string]map[string]string {
 	long_arg_map := make(map[string]string)
 
 	tmp_rem := cmd_rem
-	for ok := true; ok; ok = len(tmp_rem) > 0 {
+	for ; len(tmp_rem) > 0; {
 		result := re.FindSubmatchIndex([]byte(string(tmp_rem)))
 		if len(result) == 0{
-			fmt.Println("The remaining string was not valid. Got up to:", string(tmp_rem))
-			break
+			msg := fmt.Sprintln("The remaining string was not valid. Got up to:", string(tmp_rem))
+			fmt.Println(msg)
+			return nil, nil, errors.New(msg)
 		}
-		fmt.Println("Looking at:", string(tmp_rem))
-		//fmt.Println(result)
-		//fmt.Println(re.SubexpNames())
 
 		var k_start, k_end, v_start, v_end int
 		var is_long_arg bool
@@ -147,7 +179,6 @@ func parseFlaggedArgs(cmd_rem []rune) map[string]map[string]string {
 
 			is_long_arg = false
 		}
-		//fmt.Println("Accessing... k_start:", k_start, "k_end:", k_end, "v_start:", v_start, "v_end:", v_end)
 
 		var arg_name, arg_val []rune
 
@@ -158,8 +189,6 @@ func parseFlaggedArgs(cmd_rem []rune) map[string]map[string]string {
 		} else {
 			arg_val = make([]rune, 0)
 		}
-
-		fmt.Println("Parsed key:",string(arg_name), "val:", string(arg_val))
 
 		trimmed_key_name := strings.Trim(string(arg_name), " -") // Trim spaces and dashes from key name
 		trimmed_value := strings.Trim(string(arg_val), " ")
@@ -176,15 +205,7 @@ func parseFlaggedArgs(cmd_rem []rune) map[string]map[string]string {
 			// Likewise, if short arg has no value, use the end of the key instead of val to cut
 			tmp_rem = tmp_rem[k_end:]
 		}
-
-
-		fmt.Println("Remaining tmp_rem:", string(tmp_rem))
 	}
 
-	fmt.Println("++++ That's all, folks!")
-
-	return map[string]map[string]string{
-		"short": short_arg_map,
-		"long": long_arg_map,
-	}
+	return short_arg_map, long_arg_map, nil
 }

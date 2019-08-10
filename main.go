@@ -14,14 +14,13 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 
-	"github.com/order-of-axis-association/AquaBot/types"
-
-	"github.com/order-of-axis-association/AquaBot/db"
-
 	"github.com/order-of-axis-association/AquaBot/admin"
 	"github.com/order-of-axis-association/AquaBot/argparse"
+	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/funcs"
 	"github.com/order-of-axis-association/AquaBot/triggers"
+	"github.com/order-of-axis-association/AquaBot/types"
+	"github.com/order-of-axis-association/AquaBot/utils"
 	"github.com/order-of-axis-association/AquaBot/webhooks"
 )
 
@@ -105,30 +104,38 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 
 // These funcs are meant to be "real" functionality of the bot
 // where invocation requires prepending the entire message with a !
+// These will naturally not have a types.CmdArgs due to the lack of a "command" input
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println("Starting route logic")
 
-	func_maps := []map[string]interface{}{
-		funcs.FuncMap,
-		admin.FuncMap,
+	cmd_configs := []types.CmdConfig{
+		{funcs.FuncMap, funcs.FlagMap},
+		{funcs.FuncMap, admin.FlagMap},
 	}
 
-	for _, func_map := range func_maps {
+	for _, cmdconfig := range cmd_configs {
+		flag_map := cmdconfig.FlagMaps
+		func_map := cmdconfig.FuncMaps
+
 		for f_str, f := range func_map {
+			flag_config := make(map[string]string)
+			if config, exists := flag_map[f_str]; exists {
+				flag_config = config
+			}
 
-			arg_cmd := argparse.ParseCommandString(message)
+			cmd_args, err := argparse.ParseCommandString(message, flag_config)
+			if err != nil {
+				fmt.Println("Could not parse this command. Skipping. Input was:", message)
+				utils.ApplyEmoji("error", "⁉", s, m)
+				return
+			}
 
-			fmt.Println("Parsed arg cmd: %+v", arg_cmd)
+			fmt.Println("Parsed arg cmd: %+v", cmd_args)
+			fmt.Println("Attempting to route func for:", f_str)
 
-			f_str_lower := strings.ToLower(f_str)
-			f_str_lower_runes := []rune(f_str_lower)
-			message_runes := []rune(message)
-
-			fmt.Println("Attempting to route func for:", f_str, f_str_lower)
-
-			if strings.HasPrefix(strings.ToLower(message), f_str_lower) {
-				f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
-					string(message_runes[len(f_str_lower_runes):]), // This annoying shit to preserve casing in the message
+			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(f_str) {
+				f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
+					cmd_args,
 					s,
 					m,
 					global_state)

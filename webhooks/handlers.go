@@ -16,15 +16,15 @@ import (
 var AlertConfig = map[string]map[string][]string{
 	"604536071891714069": map[string][]string{
 		"604599071063408680": []string{
-			"test-repo",
-			"AquaBot",
+			"order-of-axis-association/test-repo",
+			"order-of-axis-association/AquaBot",
 		},
 	},
 	"602320820835975198": map[string][]string{
 		"604621897078013955": []string{
-			"AquaBot",
-			"terraform",
-			"OA_web",
+			"order-of-axis-association/AquaBot",
+			"order-of-axis-association/terraform",
+			"order-of-axis-association/OA_web",
 		},
 	},
 }
@@ -41,7 +41,6 @@ func handlePushPayload(push github.PushPayload, dg *discordgo.Session) {
 
 	repository := push.Repository
 	full_repo_name := repository.FullName
-	repo_name := repository.Name
 
 	message := sender_login + " just pushed " + num_commits + " to *" + full_repo_name + "*\n"
 
@@ -64,12 +63,12 @@ func handlePushPayload(push github.PushPayload, dg *discordgo.Session) {
 	message = message + "\n Don't mind me. I'm just a useless goddess anyway. :("
 
 	for _, channel_config := range AlertConfig {
-		for channel_id, enabled_repos := range channel_config {
+		for channel_id, enabled_repopaths := range channel_config {
 
 			valid_repo := false
 
-			for _, enabled_repo := range enabled_repos {
-				if enabled_repo == repo_name {
+			for _, enabled_repopath := range enabled_repopaths {
+				if enabled_repopath == full_repo_name {
 					valid_repo = true
 				}
 			}

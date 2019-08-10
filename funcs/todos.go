@@ -8,7 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func Todo(input string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
+func Todo(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		return
