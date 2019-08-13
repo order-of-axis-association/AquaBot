@@ -7,9 +7,9 @@ import (
 var Prefix = "$"
 
 var FuncMap = types.FuncMap {
-	"cleardb": ClearDB,
+	"cleartable": ClearTable,
 }
 
 var FlagMap = types.FlagMap {
-	"cleardb": ClearDBFlags(),
+	"cleartable": ClearTableFlags(),
 }

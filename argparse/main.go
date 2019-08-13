@@ -93,9 +93,6 @@ func trimEncasingQuotes(val string) (string) {
 	}
 
 	for _, quote := range valid_quotes {
-		fmt.Println("----")
-		fmt.Println(val[0])
-		fmt.Println(quote)
 		if string(val[0]) == quote {
 			return strings.Trim(val, quote)
 		}

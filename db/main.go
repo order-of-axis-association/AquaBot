@@ -100,7 +100,7 @@ func Migrate(global_state types.G_State) {
 	fmt.Println("%+v", global_state)
 	g_db := global_state.DBConn
 
-	g_db.AutoMigrate(&Server{})
+	g_db.AutoMigrate(&Guild{})
 	g_db.AutoMigrate(&Channel{})
 	g_db.AutoMigrate(&User{})
 	g_db.AutoMigrate(&Reminder{})

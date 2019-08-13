@@ -19,16 +19,16 @@ func ImportGuild (guild_id_s string, g_state types.G_State) {
 		fmt.Println("Could not convert guild_id to int:", err)
 	}
 
-	server := Server{ServerId: guild_id}
-	if result := db.NewRecord(server); result {
-		//db.Create(&server)
-		//fmt.Println("Created new Server record for",guild_id)
+	guild := Guild{GuildId: guild_id}
+	if result := db.NewRecord(guild); result {
+		//db.Create(&guild)
+		//fmt.Println("Created new Guild record for",guild_id)
 	}
-	//fmt.Println("Server record already existed")
+	//fmt.Println("Guild record already existed")
 
-	var serv Server
-	if err := db.Where("server_id = ?", guild_id).First(&serv); err != nil {
-		fmt.Println("Could not find server by", guild_id)
+	var g Guild
+	if err := db.Where("guild_id = ?", guild_id).First(&g); err != nil {
+		fmt.Println("Could not find server by", guild_id, "Err:", err)
 	}
 
 	//fmt.Println("%+v", serv)

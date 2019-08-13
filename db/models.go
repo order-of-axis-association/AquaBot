@@ -4,6 +4,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+var StringToModelMap = map[string]interface{}{
+	"guild": Guild{},
+	"channel": Channel{},
+	"user": User{},
+}
+
 // I know I really should be adding struct tags but
 // GORM's documentation is terrible and it seems there's been
 // a sudden uptick in activity through PRs and whatnot.
@@ -11,10 +17,11 @@ import (
 // GORM will actually add things like FKs and update the struct tag docus.
 // As is, it's really badly documented and some of the "features" on the docs don't actually work.
 
-type Server struct {
+// Servers are called Guilds in Discord docs
+type Guild struct {
 	gorm.Model
 
-	ServerId	int
+	GuildId		int
 }
 
 type Channel struct {

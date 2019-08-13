@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"errors"
 
+	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
 
@@ -29,26 +30,30 @@ func isAdminUser(s *discordgo.Session, m *discordgo.MessageCreate) (bool, error)
 	return false, errors.New("The user " + author_id_string + " is not an authorized admin user.")
 }
 
-
-func ClearDBFlags() map[string]string {
+func ClearTableFlags() map[string]string {
 	return map[string]string{
-		"t": "table",
+		"m": "model",
 	}
 }
 
-func ClearDB(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, g_state types.G_State) error {
+func ClearTable(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, g_state types.G_State) error {
 	if is_admin, err := isAdminUser(s, m); ! is_admin {
 		return err
 	}
 
-	if val, ok := cmd_args.FlagArgs["table"]; ok {
-		fmt.Println("Processing cleardb command...")
-		return utils.Say(val, s, m)
-		//g_state.DBConn.
-	} else {
-		fmt.Println("Not enough args")
-		return utils.Error("Must provide a -t/--table to clear!", s, m)
+	model, ok := cmd_args.FlagArgs["model"]
+	if ! ok {
+		return utils.Error("Must provide a -m/--model to clear!", s, m)
 	}
 
-	return nil
+	model_obj, ok := db.StringToModelMap[model]
+	if ! ok {
+		return utils.Error("Invalid model name provided!", s, m)
+	}
+
+	if err := g_state.DBConn.Delete(model_obj).Error; err != nil {
+		return utils.Error(fmt.Sprintf("Could not delete records for model '%s' Error:", err), s, m)
+	}
+
+	return utils.Say(fmt.Sprintf("Successfully deleted all records for model '%s'", strings.Title(model)), s, m)
 }
