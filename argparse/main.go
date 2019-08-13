@@ -15,10 +15,10 @@ import (
 // Parses out types.CmdArgs
 // Must provide all positional args BEFORE args with flags.
 // Eg,
-// mycmd arg1 arg2 arg3 --myflag somevalue	<= VALID
+// mycmd arg1 arg2 arg3 --myflag=somevalue	<= VALID
 // mycmd --myflag somevalue					<= VALID
 // mycmd arg1								<= VALID
-// mycmd arg1 arg2 --myflag somevalue arg3	<= INVALID
+// mycmd arg1 arg2 --myflag=somevalue arg3	<= INVALID
 //
 // NOTE: If no FlagConfig is found for a command, all args will be DISCARDED (Original message can be found in CmdArgs.OrigMsg
 func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArgs, error) {
@@ -50,8 +50,8 @@ func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArg
 		var positional_args, flagged_args []rune
 		if strings.Contains(string(cmd_rem), " -") {
 			// We have flagged args - Split out the positional args and flagged args
-			first_flag_arg_i := strings.Index(string(cmd_rem), " -")
 
+			first_flag_arg_i := strings.Index(string(cmd_rem), " -")
 			positional_args = cmd_rem[:first_flag_arg_i]
 			flagged_args = cmd_rem[first_flag_arg_i:]
 		} else {
@@ -72,6 +72,7 @@ func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArg
 		cmd_args.PosArgs = parsed_positional_args
 
 		if len(flag_config) > 0 {
+			// If we have a flag config, let's unify the short/long args.
 			cmd_args.FlagArgs, err = processFlagConfig(short_flagged_args, long_flagged_args, flag_config)
 			if err != nil {
 				msg := fmt.Sprintln("Could not unify flags with config:", err)
@@ -84,17 +85,38 @@ func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArg
 	return cmd_args, nil
 }
 
+func trimEncasingQuotes(val string) (string) {
+	valid_quotes := []string{
+		"'",
+		"\"",
+		"`",
+	}
+
+	for _, quote := range valid_quotes {
+		fmt.Println("----")
+		fmt.Println(val[0])
+		fmt.Println(quote)
+		if string(val[0]) == quote {
+			return strings.Trim(val, quote)
+		}
+	}
+
+	return val
+}
+
 // This function takes the cmd_args.ShortFlagArgs and cmd_argsLongFlagArgs
 // and using the input config, will map both short and long vals to FlagArgs
 // The input config should be a map of short flag to long flag, eg
 // [ "f": "full", "h": "help", "c": "commit" ], etc etc
 // This also means this function will throw an error if both the short and long
 // versions of the flag are set, eg if the command had "!cmd -c 'abc12345' --commit '12345abc'"
+// This function will also trim quotes if value is encased in them.
 func processFlagConfig(short_flags map[string]string, long_flags map[string]string, config map[string]string) (map[string]string, error) {
 	flag_args := make(map[string]string)
 
 	for short_flag, long_flag := range config {
 		if short_val, exists := short_flags[short_flag]; exists {
+			short_val = trimEncasingQuotes(short_val)
 			flag_args[short_flag] = short_val
 			flag_args[long_flag] = short_val
 		}
@@ -106,6 +128,7 @@ func processFlagConfig(short_flags map[string]string, long_flags map[string]stri
 				return make(map[string]string), errors.New(msg)
 			}
 
+			long_val = trimEncasingQuotes(long_val)
 			flag_args[short_flag] = long_val
 			flag_args[long_flag] = long_val
 		}
@@ -114,7 +137,7 @@ func processFlagConfig(short_flags map[string]string, long_flags map[string]stri
 	return flag_args, nil
 }
 
-func parsePositionalArgs(cmd_rem []rune) map[int]string {
+func parsePositionalArgs(cmd_rem []rune) (map[int]string) {
 	re := regexp.MustCompile(`(?P<arg>[^'" ]+|'[^']+'|"[^"]+")`)
 	results := re.FindAllString(string(cmd_rem), -1)
 
@@ -139,7 +162,7 @@ func parsePositionalArgs(cmd_rem []rune) map[int]string {
 // - - - Quoted strings can contain the "other" type of quote inside the quote. Eg, "string with ' single quote"
 func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, error) {
 	// Oof lmao. Maybe I should split this into regular code and not regex.
-	re := regexp.MustCompile(`(?:(?P<shortarg>-[a-zA-Z])(?:[ =](?P<shortvalue>[^- '"]+|'[^']+'|"[^"]+")?)|(?P<longarg>--[a-zA-Z-]+)=(?P<longvalue>[^- '"]+|'[^']+'|"[^"]+"))`)
+	re := regexp.MustCompile(`(?:(?P<shortarg>-[a-zA-Z])(?:[ =](?P<shortvalue>[^- \x60'"]+|'[^']+'|"[^"]+"|\x60[^\x60]+\x60)?)|(?P<longarg>--[a-zA-Z-]+)(?:=(?P<longvalue>[^- \x60'"]+|'[^']+'|"[^"]+"|\x60[^\x60]+\x60))?)`)
 
 	short_arg_map := make(map[string]string)
 	long_arg_map := make(map[string]string)
@@ -184,7 +207,7 @@ func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, err
 
 		arg_name = tmp_rem[k_start:k_end]
 		if v_start != -1 {
-			// This fun block because short args can not have a value, in which case default to empty string as the "value"
+			// Because args can not have a value, in which case default to empty string as the "value"
 			arg_val = tmp_rem[v_start:v_end]
 		} else {
 			arg_val = make([]rune, 0)
@@ -202,7 +225,7 @@ func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, err
 		if v_end != -1 {
 			tmp_rem = tmp_rem[v_end:]
 		} else {
-			// Likewise, if short arg has no value, use the end of the key instead of val to cut
+			// Likewise, if arg has no value, use the end of the key instead of val to cut
 			tmp_rem = tmp_rem[k_end:]
 		}
 	}

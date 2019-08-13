@@ -7,5 +7,5 @@ import (
 )
 
 func UselessAqua(args string, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) {
-	utils.ApplyEmoji("nani", "👋", s, m)
+	utils.ApplyReaction("nani", "👋", s, m)
 }

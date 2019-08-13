@@ -1,7 +1,5 @@
 package utils
 
-// Random functionality that might be useful all around the codebase.
-
 import (
 	"fmt"
 
@@ -9,7 +7,7 @@ import (
 )
 
 // Must provide fallback_emoji_unicode as a unicde symbol
-func ApplyEmoji(emoji_name string, fallback_emoji_unicode string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func ApplyReaction(emoji_name string, fallback_emoji_unicode string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		fmt.Println("Could not find channel by ID:", err)
@@ -35,4 +33,8 @@ func ApplyEmoji(emoji_name string, fallback_emoji_unicode string, s *discordgo.S
 	if err != nil {
 		fmt.Println("Failed applying fallback emoji. Are you sure it's a default emoji?", err)
 	}
+}
+
+func ApplyErrorReaction(s *discordgo.Session, m *discordgo.MessageCreate) {
+	ApplyReaction("error", "⁉", s, m)
 }

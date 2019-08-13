@@ -133,7 +133,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 			cmd_args, err := argparse.ParseCommandString(message, flag_config)
 			if err != nil {
 				fmt.Println("Could not parse this command. Skipping. Input was:", message)
-				utils.ApplyEmoji("error", "⁉", s, m)
+				utils.ApplyErrorReaction(s, m)
 				return
 			}
 
@@ -141,11 +141,17 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 			fmt.Println("Attempting to route func for:", f_str)
 
 			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(f_str) {
-				f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
+				func_err := f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State) (error))(
 					cmd_args,
 					s,
 					m,
 					global_state)
+
+				if func_err != nil {
+					fmt.Println("Error executing function. Error:", err, "Invoked with args...")
+					fmt.Println("%+v", cmd_args)
+					utils.ApplyErrorReaction(s, m)
+				}
 			}
 		}
 	}

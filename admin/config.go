@@ -11,5 +11,5 @@ var FuncMap = types.FuncMap {
 }
 
 var FlagMap = types.FlagMap {
-	"cleardb": nil,
+	"cleardb": ClearDBFlags(),
 }
