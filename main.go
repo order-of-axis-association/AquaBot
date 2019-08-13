@@ -109,13 +109,20 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 	fmt.Println("Starting route logic")
 
 	cmd_configs := []types.CmdConfig{
-		{funcs.FuncMap, funcs.FlagMap},
-		{funcs.FuncMap, admin.FlagMap},
+		{funcs.FuncMap, funcs.FlagMap, funcs.Prefix},
+		{admin.FuncMap, admin.FlagMap, admin.Prefix},
 	}
 
 	for _, cmdconfig := range cmd_configs {
 		flag_map := cmdconfig.FlagMaps
 		func_map := cmdconfig.FuncMaps
+		prefix := cmdconfig.Prefix
+
+		if ! strings.HasPrefix(message, prefix) {
+			continue
+		} else {
+			message = strings.TrimLeft(message, prefix)
+		}
 
 		for f_str, f := range func_map {
 			flag_config := make(map[string]string)
@@ -181,11 +188,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Util commands
-	if strings.HasPrefix(m.Content, "!") {
-		fmt.Println("Routing util command with message:", m.Content)
-		routeMessageFunc(strings.TrimLeft(m.Content, "!"), s, m)
-	}
+	// Command invocation
+	routeMessageFunc(m.Content, s, m)
 
 	// See if message triggers any of the autotriggers
 	routeAutoTriggers(m.Content, s, m)

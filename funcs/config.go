@@ -4,7 +4,10 @@ import (
 	"github.com/order-of-axis-association/AquaBot/types"
 )
 
-// I guess cap camelcase cuz global?? I use underscores everywhere else :-/
+// The prefix that must be attached to any command in the FuncMap
+var Prefix = "!"
+
+// Map from the command string to the function containing its logic
 var FuncMap = types.FuncMap{
 	"ping": Ping,
 	"pong": Pong,

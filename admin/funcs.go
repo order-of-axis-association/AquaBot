@@ -8,6 +8,6 @@ import (
 	_ "github.com/jinzhu/gorm"
 )
 
-func ClearDB(input string, s *discordgo.Session, m *discordgo.MessageCreate, g_state types.G_State) {
+func ClearDB(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, g_state types.G_State) {
 	
 }
