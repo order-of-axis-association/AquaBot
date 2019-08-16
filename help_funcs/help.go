@@ -26,6 +26,7 @@ var Help = types.Command {
 var HelpUsage = `
 help
 	- Display usage information for this command.
+
 help <cmdname>
 	- Displays help information for <cmdname>
 `
@@ -47,21 +48,25 @@ func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.Message
 		return utils.Mono(addFuncPrefix(HelpUsage, package_prefix, cmd_args.Cmd), s, m)
 	}
 
-	known_help_funcs := getAllActiveCommands(is_admin)
+	known_help_funcs, known_help_funcs_prefixed := getAllActiveCommands(is_admin)
 	help_func := pos_args[0]
 
-	if !utils.StrContains(help_func, known_help_funcs) {
-		known_help_funcs_exploded := strings.Join(known_help_funcs, ", ")
+	if !utils.StrContains(help_func, known_help_funcs) &&
+	   !utils.StrContains(help_func, known_help_funcs_prefixed) {
+		known_help_funcs_exploded := strings.Join(known_help_funcs_prefixed, ", ")
 		msg := fmt.Sprintf("I don't know about the `%s` command!\nKnown commands: `%s`", help_func, known_help_funcs_exploded)
 		return utils.Error(msg, s, m)
 	}
 
 	for _, pkg := range getEnabledPackages(is_admin) {
 		for _, command := range pkg.Commands {
-			if command.Cmd == help_func {
+			if help_func == command.Cmd ||
+			   help_func == pkg.Prefix + command.Cmd {
 				if command.Usage != "" {
 					return utils.Mono(addFuncPrefix(command.Usage, pkg.Prefix, command.Cmd), s, m)
 				} else {
+					fmt.Println("Eh??")
+					fmt.Println(command.Usage)
 					return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
 				}
 			}
@@ -79,17 +84,20 @@ func getEnabledPackages(is_admin bool) []types.FuncPackageConfig {
 	return enabled_pkgs
 }
 
-func getAllActiveCommands(is_admin bool) []string {
+func getAllActiveCommands(is_admin bool) ([]string, []string) {
 	var cmds = make([]string, 0)
+	var cmds_prefixed = make([]string, 0)
 
 	for _, pkg_config := range getEnabledPackages(is_admin) {
 		for _, command := range pkg_config.Commands {
-			cmds = append(cmds, pkg_config.Prefix + command.Cmd)
+			cmds = append(cmds, command.Cmd)
+			cmds_prefixed = append(cmds_prefixed, pkg_config.Prefix + command.Cmd)
 		}
 	}
 
 	sort.Strings(cmds)
-	return cmds
+	sort.Strings(cmds_prefixed)
+	return cmds, cmds_prefixed
 }
 
 func addFuncPrefix(usage_info string, prefix string, cmdname string) string {

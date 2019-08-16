@@ -134,16 +134,16 @@ func processFlagConfig(short_flags map[string]string, long_flags map[string]stri
 	return flag_args, nil
 }
 
-func parsePositionalArgs(cmd_rem []rune) map[int]string {
+func parsePositionalArgs(cmd_rem []rune) []string {
 	re := regexp.MustCompile(`(?P<arg>[^'" ]+|'[^']+'|"[^"]+")`)
 	results := re.FindAllString(string(cmd_rem), -1)
 
-	pos_arg_map := make(map[int]string)
-	for index, result := range results {
-		pos_arg_map[index] = result
+	pos_args := make([]string, 0)
+	for _, result := range results {
+		pos_args = append(pos_args, result)
 	}
 
-	return pos_arg_map
+	return pos_args
 }
 
 // Flagged args must be in one of the following formats:

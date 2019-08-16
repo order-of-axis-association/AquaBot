@@ -24,12 +24,14 @@ type Guild struct {
 	GuildId string
 }
 
+// ---------------------------
 type Channel struct {
 	gorm.Model
 
 	ChannelId string
 }
 
+// ---------------------------
 type User struct {
 	gorm.Model
 
@@ -39,6 +41,7 @@ type User struct {
 	Bot           bool
 }
 
+// ---------------------------
 type Reminder struct {
 	gorm.Model
 
@@ -48,6 +51,7 @@ type Reminder struct {
 	Reminded bool
 }
 
+// ---------------------------
 type Todo struct {
 	gorm.Model
 
@@ -58,6 +62,7 @@ type Todo struct {
 	DoneDate int
 }
 
+// ---------------------------
 type Config struct {
 	gorm.Model
 
