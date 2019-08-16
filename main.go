@@ -13,12 +13,10 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
-	"github.com/order-of-axis-association/AquaBot/admin_funcs"
 	"github.com/order-of-axis-association/AquaBot/argparse"
 	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/types"
-	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/utils"
 	"github.com/order-of-axis-association/AquaBot/webhooks"
 )
@@ -106,13 +104,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // These will naturally not have a types.CmdArgs due to the lack of a "command" input
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println("Starting route logic for: "+message)
-
-	func_configs := []types.FuncPackageConfig{
-		util_funcs.Config,
-		admin_funcs.Config,
-	}
-
-	for _, func_config := range func_configs {
+	for _, func_config := range FUNC_CONFIG {
 		commands := func_config.Commands
 		prefix := func_config.Prefix
 

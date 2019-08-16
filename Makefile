@@ -16,7 +16,7 @@ build:
 	$(GOGET) -d ./...
 	$(MAKE) compile
 compile:
-	$(GOBUILD) -o $(BINARY_FULL_PATH) main.go
+	$(GOBUILD) -o $(BINARY_FULL_PATH) main.go func_config.go
 gcloudbuild:
 ifeq ($(ACTIVE_PROJECT_ID), $(SHARED_PROJECT_ID))
 	gcloud builds submit --config=$(CLOUDBUILD_CONFIG)
