@@ -21,7 +21,7 @@ var CheckTable = types.Command {
 }
 
 func CheckTableFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, g_state types.G_State) error {
-	if is_admin, err := isAdminUser(s, m); !is_admin {
+	if is_admin, err := utils.IsAdmin(s, m); !is_admin {
 		return err
 	}
 

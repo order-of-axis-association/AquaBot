@@ -109,10 +109,11 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 		commands := func_config.Commands
 		prefix := func_config.Prefix
 
+		var trimmed_message string
 		if !strings.HasPrefix(message, prefix) {
 			continue
 		} else {
-			message = strings.TrimLeft(message, prefix)
+			trimmed_message = strings.TrimLeft(message, prefix)
 		}
 
 		for _, command := range commands {
@@ -125,11 +126,13 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 				flag_config = command.Flags
 			}
 
-			cmd_args, err := argparse.ParseCommandString(message, flag_config)
+			cmd_args, err := argparse.ParseCommandString(trimmed_message, flag_config)
 			if err != nil {
-				fmt.Println("Could not parse this command. Skipping. Input was:", message)
+				fmt.Println("Could not parse this command. Skipping. Input was:", trimmed_message)
 				utils.ApplyErrorReaction(s, m)
 				return
+			} else {
+				fmt.Sprintln("%+v", cmd_args)
 			}
 
 			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(cmd_str) {
@@ -140,7 +143,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 					global_state)
 
 				if func_err != nil {
-					msg := fmt.Sprintf("Error executing", cmd_args.Cmd ,"@ ver", version, "Error:", func_err)
+					msg := fmt.Sprintf("[Error][Func: %s@ver%s] %s", prefix+cmd_args.Cmd , version, func_err.Error())
 					utils.Error(msg, s, m)
 				}
 			}

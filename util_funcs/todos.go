@@ -36,7 +36,6 @@ func TodoFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.Message
 	pos_args := cmd_args.PosArgs
 	if len(pos_args) == 0 {
 		msg := "Not enough args supplied!"
-		utils.Error(msg, s, m);
 		return errors.New(msg)
 	}
 	first_arg := cmd_args.PosArgs[0]

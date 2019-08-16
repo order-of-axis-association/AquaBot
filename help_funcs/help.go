@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/order-of-axis-association/AquaBot/admin_funcs"
 	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
@@ -29,15 +30,24 @@ help <cmdname>
 	- Displays help information for <cmdname>
 `
 
+var ENABLED_PACKAGES = []types.FuncPackageConfig {
+	util_funcs.Config,
+}
+
+var ADMIN_PACKAGES = []types.FuncPackageConfig {
+	admin_funcs.Config,
+}
+
 func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) error {
 	pos_args := cmd_args.PosArgs
+	is_admin, _ := utils.IsAdmin(s, m)
 
 	if len(pos_args) == 0 {
 		// !help w/ no args
 		return utils.Mono(addFuncPrefix(HelpUsage, package_prefix, cmd_args.Cmd), s, m)
 	}
 
-	known_help_funcs := getAllActiveCommands()
+	known_help_funcs := getAllActiveCommands(is_admin)
 	help_func := pos_args[0]
 
 	if !utils.StrContains(help_func, known_help_funcs) {
@@ -46,24 +56,40 @@ func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.Message
 		return utils.Error(msg, s, m)
 	}
 
-	return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
-}
-
-func getAllActiveCommands() []string {
-	var funcs = make([]string, 0)
-
-	enabled_funcs := []types.FuncPackageConfig {
-		util_funcs.Config,
-	}
-
-	for _, func_config := range enabled_funcs {
-		for _, command := range func_config.Commands {
-			funcs = append(funcs, command.Cmd)
+	for _, pkg := range getEnabledPackages(is_admin) {
+		for _, command := range pkg.Commands {
+			if command.Cmd == help_func {
+				if command.Usage != "" {
+					return utils.Mono(addFuncPrefix(command.Usage, pkg.Prefix, command.Cmd), s, m)
+				} else {
+					return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
+				}
+			}
 		}
 	}
 
-	sort.Strings(funcs)
-	return funcs
+	return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
+}
+
+func getEnabledPackages(is_admin bool) []types.FuncPackageConfig {
+	enabled_pkgs := ENABLED_PACKAGES
+	if is_admin {
+		enabled_pkgs = append(enabled_pkgs, ADMIN_PACKAGES...)
+	}
+	return enabled_pkgs
+}
+
+func getAllActiveCommands(is_admin bool) []string {
+	var cmds = make([]string, 0)
+
+	for _, pkg_config := range getEnabledPackages(is_admin) {
+		for _, command := range pkg_config.Commands {
+			cmds = append(cmds, pkg_config.Prefix + command.Cmd)
+		}
+	}
+
+	sort.Strings(cmds)
+	return cmds
 }
 
 func addFuncPrefix(usage_info string, prefix string, cmdname string) string {
