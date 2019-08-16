@@ -14,6 +14,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 	"github.com/order-of-axis-association/AquaBot/argparse"
+	"github.com/order-of-axis-association/AquaBot/config"
 	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/types"
@@ -104,7 +105,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // These will naturally not have a types.CmdArgs due to the lack of a "command" input
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println("Starting route logic for: "+message)
-	for _, func_config := range FUNC_CONFIG {
+	for _, func_config := range config.EnabledFuncPackages {
 		commands := func_config.Commands
 		prefix := func_config.Prefix
 
@@ -139,9 +140,8 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 					global_state)
 
 				if func_err != nil {
-					fmt.Println("Error executing", cmd_args.Cmd ,"@ ver", version, "Error:", func_err, "Invoked with args...")
-					fmt.Println("%+v", cmd_args)
-					utils.ApplyErrorReaction(s, m)
+					msg := fmt.Sprintf("Error executing", cmd_args.Cmd ,"@ ver", version, "Error:", func_err)
+					utils.Error(msg, s, m)
 				}
 			}
 		}

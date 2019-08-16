@@ -32,5 +32,6 @@ func Mono(message string, s *discordgo.Session, m *discordgo.MessageCreate) erro
 // Sends message with a nice unicode X prepended at the front of message
 func Error(message string, s *discordgo.Session, m *discordgo.MessageCreate) error {
 	message = fmt.Sprintf("❌ *%s*", message)
+	ApplyErrorReaction(s, m)
 	return Say(message, s, m)
 }
