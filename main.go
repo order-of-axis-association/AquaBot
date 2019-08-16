@@ -5,21 +5,20 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
-	"regexp"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
-
-	"github.com/order-of-axis-association/AquaBot/admin"
+	"github.com/order-of-axis-association/AquaBot/admin_funcs"
 	"github.com/order-of-axis-association/AquaBot/argparse"
 	"github.com/order-of-axis-association/AquaBot/db"
-	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/types"
+	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/utils"
 	"github.com/order-of-axis-association/AquaBot/webhooks"
 )
@@ -106,28 +105,31 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // where invocation requires prepending the entire message with a !
 // These will naturally not have a types.CmdArgs due to the lack of a "command" input
 func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
-	fmt.Println("Starting route logic")
+	fmt.Println("Starting route logic for: "+message)
 
-	cmd_configs := []types.CmdConfig{
-		{util_funcs.FuncMap, util_funcs.FlagMap, util_funcs.Prefix},
-		{admin.FuncMap, admin.FlagMap, admin.Prefix},
+	func_configs := []types.FuncPackageConfig{
+		util_funcs.Config,
+		admin_funcs.Config,
 	}
 
-	for _, cmdconfig := range cmd_configs {
-		flag_map := cmdconfig.FlagMaps
-		func_map := cmdconfig.FuncMaps
-		prefix := cmdconfig.Prefix
+	for _, func_config := range func_configs {
+		commands := func_config.Commands
+		prefix := func_config.Prefix
 
-		if ! strings.HasPrefix(message, prefix) {
+		if !strings.HasPrefix(message, prefix) {
 			continue
 		} else {
 			message = strings.TrimLeft(message, prefix)
 		}
 
-		for f_str, f := range func_map {
+		for _, command := range commands {
+			cmd_str := command.Cmd
+			version := command.Version
+			f := command.Func
+
 			flag_config := make(map[string]string)
-			if config, exists := flag_map[f_str]; exists {
-				flag_config = config
+			if command.Flags != nil {
+				flag_config = command.Flags
 			}
 
 			cmd_args, err := argparse.ParseCommandString(message, flag_config)
@@ -137,18 +139,15 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 				return
 			}
 
-			fmt.Println("Parsed arg cmd: %+v", cmd_args)
-			fmt.Println("Attempting to route func for:", f_str)
-
-			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(f_str) {
-				func_err := f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State) (error))(
+			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(cmd_str) {
+				func_err := f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State) error)(
 					cmd_args,
 					s,
 					m,
 					global_state)
 
 				if func_err != nil {
-					fmt.Println("Error executing function. Error:", err, "Invoked with args...")
+					fmt.Println("Error executing", cmd_args.Cmd ,"@ ver", version, "Error:", func_err, "Invoked with args...")
 					fmt.Println("%+v", cmd_args)
 					utils.ApplyErrorReaction(s, m)
 				}
@@ -168,8 +167,8 @@ func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.Messag
 
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
-		if (re.MatchString(message)) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State)) (
+		if re.MatchString(message) {
+			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
 				message,
 				s,
 				m,

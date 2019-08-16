@@ -20,7 +20,7 @@ func ApplyReaction(emoji_name string, fallback_emoji_unicode string, s *discordg
 	}
 
 	for _, emoji := range g.Emojis {
-		if (emoji.Name == emoji_name) {
+		if emoji.Name == emoji_name {
 			err = s.MessageReactionAdd(c.ID, m.ID, emoji.APIName())
 			if err != nil {
 				fmt.Println("Error applying emoji to message:", err)

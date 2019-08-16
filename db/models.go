@@ -5,9 +5,9 @@ import (
 )
 
 var StringToModelMap = map[string]interface{}{
-	"guild": Guild{},
+	"guild":   Guild{},
 	"channel": Channel{},
-	"user": User{},
+	"user":    User{},
 }
 
 // I know I really should be adding struct tags but
@@ -21,46 +21,50 @@ var StringToModelMap = map[string]interface{}{
 type Guild struct {
 	gorm.Model
 
-	GuildId		string
+	GuildId string
 }
 
 type Channel struct {
 	gorm.Model
 
-	ChannelId	string
+	ChannelId string
 }
 
 type User struct {
 	gorm.Model
 
-	UserId		string
-	Username	string
+	UserId        string
+	Username      string
 	Descriminator string // The 4 numbers after the discord name
-	Bot			bool
+	Bot           bool
 }
 
 type Reminder struct {
 	gorm.Model
 
-	UserId		string
-	Message		string
-	RemindAt	int // Should be an epoch
+	UserId   string
+	Message  string
+	RemindAt int // Should be an epoch
+	Reminded bool
 }
 
 type Todo struct {
 	gorm.Model
 
-	UserID			string
-	Task			string
+	UserID string
+	Task   string
+
+	Done     bool
+	DoneDate int
 }
 
 type Config struct {
 	gorm.Model
 
-	ServerId		string
-	ChannelId		string
-	LastUserToSet	int
+	ServerId      string
+	ChannelId     string
+	LastUserToSet int
 
-	ConfigName		string
-	ConfigValue		string
+	ConfigName  string
+	ConfigValue string
 }

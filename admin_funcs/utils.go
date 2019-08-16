@@ -1,8 +1,8 @@
-package admin
+package admin_funcs
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	_ "github.com/order-of-axis-association/AquaBot/db"
 	_ "github.com/order-of-axis-association/AquaBot/types"

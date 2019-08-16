@@ -1,10 +1,10 @@
 package argparse
 
 import (
-	"fmt"
-	"strings"
-	"regexp"
 	"errors"
+	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/order-of-axis-association/AquaBot/types"
 )
@@ -40,7 +40,7 @@ func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArg
 	}
 
 	cmd_args := types.CmdArgs{
-		Cmd: cmd_name,
+		Cmd:     cmd_name,
 		OrigMsg: cmd,
 	}
 
@@ -85,7 +85,7 @@ func ParseCommandString(cmd string, flag_config map[string]string) (types.CmdArg
 	return cmd_args, nil
 }
 
-func trimEncasingQuotes(val string) (string) {
+func trimEncasingQuotes(val string) string {
 	valid_quotes := []string{
 		"'",
 		"\"",
@@ -134,7 +134,7 @@ func processFlagConfig(short_flags map[string]string, long_flags map[string]stri
 	return flag_args, nil
 }
 
-func parsePositionalArgs(cmd_rem []rune) (map[int]string) {
+func parsePositionalArgs(cmd_rem []rune) map[int]string {
 	re := regexp.MustCompile(`(?P<arg>[^'" ]+|'[^']+'|"[^"]+")`)
 	results := re.FindAllString(string(cmd_rem), -1)
 
@@ -165,9 +165,9 @@ func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, err
 	long_arg_map := make(map[string]string)
 
 	tmp_rem := cmd_rem
-	for ; len(tmp_rem) > 0; {
+	for len(tmp_rem) > 0 {
 		result := re.FindSubmatchIndex([]byte(string(tmp_rem)))
-		if len(result) == 0{
+		if len(result) == 0 {
 			msg := fmt.Sprintln("The remaining string was not valid. Got up to:", string(tmp_rem))
 			fmt.Println(msg)
 			return nil, nil, errors.New(msg)

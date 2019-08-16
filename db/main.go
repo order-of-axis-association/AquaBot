@@ -2,12 +2,12 @@ package db
 
 import (
 	"fmt"
-	"time"
 	"io/ioutil"
+	"time"
 
-	"github.com/go-sql-driver/mysql"
-	"crypto/x509"
 	"crypto/tls"
+	"crypto/x509"
+	"github.com/go-sql-driver/mysql"
 
 	"github.com/order-of-axis-association/AquaBot/types"
 
@@ -45,9 +45,9 @@ func registerAquabotTLSConfig() {
 	client_cert = append(client_cert, certs)
 
 	mysql.RegisterTLSConfig(tls_config_name, &tls.Config{
-		RootCAs:		root_cert_pool,
-		Certificates:	client_cert,
-		ServerName:		cloud_sql_server_name,
+		RootCAs:      root_cert_pool,
+		Certificates: client_cert,
+		ServerName:   cloud_sql_server_name,
 	})
 }
 
@@ -74,17 +74,17 @@ func BuildCloudSQLDSN() string {
 	}
 
 	cfg := mysql.Config{
-		User:	config.User,
-		Passwd: config.Password,
-		Addr:	config.Host+":3306",
-		Net:	"tcp",
-		DBName:	config.DBName,
-		Loc:	new_york_loc,
+		User:                 config.User,
+		Passwd:               config.Password,
+		Addr:                 config.Host + ":3306",
+		Net:                  "tcp",
+		DBName:               config.DBName,
+		Loc:                  new_york_loc,
 		AllowNativePasswords: true,
 
-		ParseTime:	true,
+		ParseTime: true,
 
-		TLSConfig:	tls_config_name,
+		TLSConfig: tls_config_name,
 	}
 
 	dsn := cfg.FormatDSN()

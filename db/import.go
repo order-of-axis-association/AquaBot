@@ -11,7 +11,7 @@ import (
 	_ "github.com/jinzhu/gorm"
 )
 
-func ImportGuild (guild_id string, g_state types.G_State) {
+func ImportGuild(guild_id string, g_state types.G_State) {
 	db := g_state.DBConn
 
 	guild := Guild{}
@@ -22,7 +22,7 @@ func ImportGuild (guild_id string, g_state types.G_State) {
 	}
 }
 
-func ImportChannel (chan_id string, g_state types.G_State) {
+func ImportChannel(chan_id string, g_state types.G_State) {
 	db := g_state.DBConn
 
 	channel := Channel{}
@@ -33,7 +33,7 @@ func ImportChannel (chan_id string, g_state types.G_State) {
 	}
 }
 
-func ImportUser (user_obj *discordgo.User, g_state types.G_State) {
+func ImportUser(user_obj *discordgo.User, g_state types.G_State) {
 	db := g_state.DBConn
 	user_id := user_obj.ID
 	username := user_obj.Username

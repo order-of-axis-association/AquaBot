@@ -23,6 +23,13 @@ func Say(message string, s *discordgo.Session, m *discordgo.MessageCreate) error
 	return nil
 }
 
+// Sends the message as "monospace", ie codeblocks
+func Mono(message string, s *discordgo.Session, m *discordgo.MessageCreate) error {
+	message = fmt.Sprintf("```%s```", message)
+	return Say(message, s, m)
+}
+
+// Sends message with a nice unicode X prepended at the front of message
 func Error(message string, s *discordgo.Session, m *discordgo.MessageCreate) error {
 	message = fmt.Sprintf("❌ *%s*", message)
 	return Say(message, s, m)
