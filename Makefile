@@ -14,6 +14,8 @@ BINARY_FULL_PATH=$(BINARY_PATH)$(BINARY_NAME)
 all: build
 build:
 	$(GOGET) -d ./...
+	$(MAKE) compile
+compile:
 	$(GOBUILD) -o $(BINARY_FULL_PATH) main.go
 gcloudbuild:
 ifeq ($(ACTIVE_PROJECT_ID), $(SHARED_PROJECT_ID))

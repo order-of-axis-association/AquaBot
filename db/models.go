@@ -21,19 +21,19 @@ var StringToModelMap = map[string]interface{}{
 type Guild struct {
 	gorm.Model
 
-	GuildId		int
+	GuildId		string
 }
 
 type Channel struct {
 	gorm.Model
 
-	ChannelId	int
+	ChannelId	string
 }
 
 type User struct {
 	gorm.Model
 
-	UserId		int
+	UserId		string
 	Username	string
 	Descriminator string // The 4 numbers after the discord name
 	Bot			bool
@@ -42,7 +42,7 @@ type User struct {
 type Reminder struct {
 	gorm.Model
 
-	UserId		int
+	UserId		string
 	Message		string
 	RemindAt	int // Should be an epoch
 }
@@ -50,15 +50,15 @@ type Reminder struct {
 type Todo struct {
 	gorm.Model
 
-	UserID			int
+	UserID			string
 	Task			string
 }
 
 type Config struct {
 	gorm.Model
 
-	ServerId		int
-	ChannelId		int
+	ServerId		string
+	ChannelId		string
 	LastUserToSet	int
 
 	ConfigName		string

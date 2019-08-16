@@ -17,7 +17,7 @@ import (
 	"github.com/order-of-axis-association/AquaBot/admin"
 	"github.com/order-of-axis-association/AquaBot/argparse"
 	"github.com/order-of-axis-association/AquaBot/db"
-	"github.com/order-of-axis-association/AquaBot/funcs"
+	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/triggers"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
@@ -109,7 +109,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 	fmt.Println("Starting route logic")
 
 	cmd_configs := []types.CmdConfig{
-		{funcs.FuncMap, funcs.FlagMap, funcs.Prefix},
+		{util_funcs.FuncMap, util_funcs.FlagMap, util_funcs.Prefix},
 		{admin.FuncMap, admin.FlagMap, admin.Prefix},
 	}
 

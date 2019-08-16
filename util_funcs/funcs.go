@@ -1,4 +1,4 @@
-package funcs
+package util_funcs
 
 import (
 	_ "fmt"

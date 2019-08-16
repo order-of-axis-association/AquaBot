@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"strconv"
+	_ "strconv"
 
 	"github.com/order-of-axis-association/AquaBot/types"
 
@@ -11,60 +11,40 @@ import (
 	_ "github.com/jinzhu/gorm"
 )
 
-func ImportGuild (guild_id_s string, g_state types.G_State) {
+func ImportGuild (guild_id string, g_state types.G_State) {
 	db := g_state.DBConn
 
-	guild_id, err := strconv.Atoi(guild_id_s)
-	if err != nil {
-		fmt.Println("Could not convert guild_id to int:", err)
+	guild := Guild{}
+	if not_found := db.Where("guild_id = ?", guild_id).First(&guild).RecordNotFound(); not_found {
+		guild = Guild{GuildId: guild_id}
+		db.Create(&guild)
+		fmt.Println("Created new Guild record for", guild_id)
 	}
-
-	guild := Guild{GuildId: guild_id}
-	if result := db.NewRecord(guild); result {
-		//db.Create(&guild)
-		//fmt.Println("Created new Guild record for",guild_id)
-	}
-	//fmt.Println("Guild record already existed")
-
-	var g Guild
-	if err := db.Where("guild_id = ?", guild_id).First(&g); err != nil {
-		fmt.Println("Could not find server by", guild_id, "Err:", err)
-	}
-
-	//fmt.Println("%+v", serv)
-
-	//fmt.Println("AAAAAAAAAAAA")
-	//var servs []Server
-	//db.Find(&servs)
-	//for _, serv := range servs {
-		//fmt.Println("%+v", serv)
-	//}
-	fmt.Println("Done")
-
 }
 
-func ImportChannel (chann_id string, g_state types.G_State) {
+func ImportChannel (chan_id string, g_state types.G_State) {
 	db := g_state.DBConn
 
-	var channel Channel
-	if err := db.Where("channel_id = ?", chann_id).First(&channel); err != nil {
-		fmt.Println("Could not find channel by", chann_id)
+	channel := Channel{}
+	if not_found := db.Where("channel_id = ?", chan_id).First(&channel).RecordNotFound(); not_found {
+		channel = Channel{ChannelId: chan_id}
+		db.Create(&channel)
+		fmt.Println("Created new Channel record for", chan_id)
 	}
-
-	fmt.Println("%+v", channel)
 }
 
 func ImportUser (user_obj *discordgo.User, g_state types.G_State) {
 	db := g_state.DBConn
-
 	user_id := user_obj.ID
+	username := user_obj.Username
+	descriminator := user_obj.Discriminator
 
-	var user User
-	if err := db.Where("user_id = ?", user_id).First(&user); err != nil {
-		fmt.Println("Could not find user by", user_id)
+	user := User{}
+	if not_found := db.Where("user_id = ?", user_id).First(&user).RecordNotFound(); not_found {
+		user = User{UserId: user_id, Username: username, Descriminator: descriminator}
+		db.Create(&user)
+		fmt.Println("Created new User record for", user)
 	}
-
-	fmt.Println("%+v", user)
 }
 
 func ImportUsers(users []*discordgo.User, g_state types.G_State) {

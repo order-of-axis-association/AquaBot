@@ -1,4 +1,4 @@
-package funcs
+package util_funcs
 
 import (
 	"github.com/order-of-axis-association/AquaBot/types"
@@ -13,6 +13,9 @@ var FuncMap = types.FuncMap{
 	"pong": Pong,
 	"help": Help,
 	"todo": Todo,
+	//"remindme", Make the command
+	//				"!remindeme to '<whatever text>' in '<smhdwmy format>' (optional please aqua-sama)"
+	//				if you leave out the last part aqua only has a 95% chance of reminding you.
 }
 
 // Flag maps are maps from the command name to the func that returns the flag config
