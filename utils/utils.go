@@ -5,7 +5,7 @@ import (
 	"fmt"
 	_ "strings"
 
-	"github.com/bwmarrin/discordgo"
+	"github.com/order-of-axis-association/AquaBot/types"
 )
 
 func StrContains(needle string, haystack []string) bool {
@@ -17,12 +17,12 @@ func StrContains(needle string, haystack []string) bool {
 	return false
 }
 
-func IsAdmin(s *discordgo.Session, m *discordgo.MessageCreate) (bool, error) {
+func IsAdmin(state types.MessageState) (bool, error) {
 	valid_users := []string{
 		"Remi#5619",
 	}
 
-	author_id_string := m.Author.Username + "#" + m.Author.Discriminator
+	author_id_string := state.M.Author.Username + "#" + state.M.Author.Discriminator
 
 	fmt.Println(author_id_string)
 

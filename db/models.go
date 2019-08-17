@@ -73,3 +73,12 @@ type Config struct {
 	ConfigName  string
 	ConfigValue string
 }
+
+// ---------------------------
+type TempMessage struct {
+	gorm.Model
+
+	MessageId	string
+	ChannelId	string
+	Length		int // Num of seconds to keep message up
+}

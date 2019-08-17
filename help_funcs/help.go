@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/order-of-axis-association/AquaBot/admin_funcs"
 	"github.com/order-of-axis-association/AquaBot/util_funcs"
 	"github.com/order-of-axis-association/AquaBot/types"
@@ -39,13 +38,13 @@ var ADMIN_PACKAGES = []types.FuncPackageConfig {
 	admin_funcs.Config,
 }
 
-func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) error {
+func HelpFunc(cmd_args types.CmdArgs, state types.MessageState) error {
 	pos_args := cmd_args.PosArgs
-	is_admin, _ := utils.IsAdmin(s, m)
+	is_admin, _ := utils.IsAdmin(state)
 
 	if len(pos_args) == 0 {
 		// !help w/ no args
-		return utils.Mono(addFuncPrefix(HelpUsage, package_prefix, cmd_args.Cmd), s, m)
+		return utils.Mono(addFuncPrefix(HelpUsage, package_prefix, cmd_args.Cmd), state)
 	}
 
 	known_help_funcs, known_help_funcs_prefixed := getAllActiveCommands(is_admin)
@@ -55,7 +54,7 @@ func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.Message
 	   !utils.StrContains(help_func, known_help_funcs_prefixed) {
 		known_help_funcs_exploded := strings.Join(known_help_funcs_prefixed, ", ")
 		msg := fmt.Sprintf("I don't know about the `%s` command!\nKnown commands: `%s`", help_func, known_help_funcs_exploded)
-		return utils.Error(msg, s, m)
+		return utils.Error(msg, state)
 	}
 
 	for _, pkg := range getEnabledPackages(is_admin) {
@@ -63,17 +62,17 @@ func HelpFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.Message
 			if help_func == command.Cmd ||
 			   help_func == pkg.Prefix + command.Cmd {
 				if command.Usage != "" {
-					return utils.Mono(addFuncPrefix(command.Usage, pkg.Prefix, command.Cmd), s, m)
+					return utils.Mono(addFuncPrefix(command.Usage, pkg.Prefix, command.Cmd), state)
 				} else {
 					fmt.Println("Eh??")
 					fmt.Println(command.Usage)
-					return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
+					return utils.TempSay("I'm a cute useless godess with a great ass. Leave me alone.", state)
 				}
 			}
 		}
 	}
 
-	return utils.Say("I'm a cute useless godess with a great ass. Leave me alone.", s, m)
+	return utils.TempSay("I'm a cute useless godess with a great ass. Leave me alone.", state)
 }
 
 func getEnabledPackages(is_admin bool) []types.FuncPackageConfig {

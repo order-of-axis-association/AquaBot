@@ -2,7 +2,6 @@ package util_funcs
 
 import (
 	_ "fmt"
-	"github.com/bwmarrin/discordgo"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
@@ -16,8 +15,8 @@ var Ping = types.Command {
 	Usage: "",
 }
 
-func PingFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) error {
-	return utils.Say("Pong!", s, m)
+func PingFunc(cmd_args types.CmdArgs, state types.MessageState) error {
+	return utils.TempSay("Pong!", state)
 }
 
 var Pong = types.Command {
@@ -29,6 +28,6 @@ var Pong = types.Command {
 	Usage: "",
 }
 
-func PongFunc(cmd_args types.CmdArgs, s *discordgo.Session, m *discordgo.MessageCreate, global_state types.G_State) error {
-	return utils.Say("Ping!", s, m)
+func PongFunc(cmd_args types.CmdArgs, state types.MessageState) error {
+	return utils.TempSay("Ping!", state)
 }

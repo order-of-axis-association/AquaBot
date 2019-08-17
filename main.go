@@ -14,6 +14,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 	"github.com/order-of-axis-association/AquaBot/argparse"
+	"github.com/order-of-axis-association/AquaBot/autodelete"
 	"github.com/order-of-axis-association/AquaBot/config"
 	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/triggers"
@@ -61,10 +62,7 @@ func main() {
 		fmt.Println("Error opening Discord session: ", err)
 	}
 
-	// Start github webhook listener server
-
-	go webhooks.InitWebhookServer(dg)
-
+	// Create DB connection
 	dsn := db.BuildCloudSQLDSN()
 	gorm_db, err := gorm.Open("mysql", dsn)
 	global_state.DBConn = gorm_db
@@ -72,6 +70,12 @@ func main() {
 	fmt.Println("dbconn: %+v", global_state.DBConn)
 
 	db.Migrate(global_state)
+
+	// Start github webhook listener server
+	go webhooks.InitWebhookServer(dg)
+
+	// Start auto message deleter
+	go autodelete.AutoDeleter(dg, global_state)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Aqua is now running.  Press CTRL-C to exit.")
@@ -103,7 +107,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // These funcs are meant to be "real" functionality of the bot
 // where invocation requires prepending the entire message with a !
 // These will naturally not have a types.CmdArgs due to the lack of a "command" input
-func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func routeMessageFunc(message string, state types.MessageState) {
 	fmt.Println("Starting route logic for: "+message)
 	for _, func_config := range config.EnabledFuncPackages {
 		commands := func_config.Commands
@@ -129,22 +133,20 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 			cmd_args, err := argparse.ParseCommandString(trimmed_message, flag_config)
 			if err != nil {
 				fmt.Println("Could not parse this command. Skipping. Input was:", trimmed_message)
-				utils.ApplyErrorReaction(s, m)
+				utils.ApplyErrorReaction(state)
 				return
 			} else {
 				fmt.Sprintln("%+v", cmd_args)
 			}
 
 			if strings.ToLower(cmd_args.Cmd) == strings.ToLower(cmd_str) {
-				func_err := f.(func(types.CmdArgs, *discordgo.Session, *discordgo.MessageCreate, types.G_State) error)(
+				func_err := f.(func(types.CmdArgs, types.MessageState) error)(
 					cmd_args,
-					s,
-					m,
-					global_state)
+					state)
 
 				if func_err != nil {
 					msg := fmt.Sprintf("[Error][Func: %s@ver%s] %s", prefix+cmd_args.Cmd , version, func_err.Error())
-					utils.Error(msg, s, m)
+					utils.Error(msg, state)
 				}
 			}
 		}
@@ -155,7 +157,7 @@ func routeMessageFunc(message string, s *discordgo.Session, m *discordgo.Message
 // Autotriggers are meant to be lightweight and "fun" things that react
 // to certain regexes in messages - regardless of whether there was a ! at the beginning of the command.
 // Eg, one func is triggers.UselessAqua which just adds an emote to any message that has "useless" or "aqua" in it.
-func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func routeAutoTriggers(message string, state types.MessageState) {
 	fmt.Println("Seeing if message applies to any auto-react triggers")
 
 	var re *regexp.Regexp
@@ -163,11 +165,9 @@ func routeAutoTriggers(message string, s *discordgo.Session, m *discordgo.Messag
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
 		if re.MatchString(message) {
-			f.(func(string, *discordgo.Session, *discordgo.MessageCreate, types.G_State))(
+			f.(func(string, types.MessageState))(
 				message,
-				s,
-				m,
-				global_state)
+				state)
 		}
 	}
 }
@@ -188,11 +188,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	state := types.MessageState{
+		S: s,
+		M: m,
+		G: &global_state,
+	}
+
 	// Command invocation
-	routeMessageFunc(m.Content, s, m)
+	routeMessageFunc(m.Content, state)
 
 	// See if message triggers any of the autotriggers
-	routeAutoTriggers(m.Content, s, m)
+	routeAutoTriggers(m.Content, state)
 }
 
 // guild is joined.

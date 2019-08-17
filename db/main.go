@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"io/ioutil"
-	"time"
 
 	"crypto/tls"
 	"crypto/x509"
@@ -24,7 +23,6 @@ var client_key_path string = "secrets/client-key.pem"
 var cloud_sql_server_name string = "oa-aquabot:aquabot-master"
 
 var tls_config_name string = "custom"
-var new_york_location string = "America/New_York"
 
 func registerAquabotTLSConfig() {
 	root_cert_pool := x509.NewCertPool()
@@ -68,18 +66,12 @@ func BuildCloudSQLDSN() string {
 
 	registerAquabotTLSConfig()
 
-	new_york_loc, err := time.LoadLocation(new_york_location)
-	if err != nil {
-		fmt.Println("Could not load America/New_York location!:", err)
-	}
-
 	cfg := mysql.Config{
 		User:                 config.User,
 		Passwd:               config.Password,
 		Addr:                 config.Host + ":3306",
 		Net:                  "tcp",
 		DBName:               config.DBName,
-		Loc:                  new_york_loc,
 		AllowNativePasswords: true,
 
 		ParseTime: true,
@@ -106,6 +98,7 @@ func Migrate(global_state types.G_State) {
 	g_db.AutoMigrate(&Reminder{})
 	g_db.AutoMigrate(&Todo{})
 	g_db.AutoMigrate(&Config{})
+	g_db.AutoMigrate(&TempMessage{})
 
 	fmt.Println("Done migrating.")
 

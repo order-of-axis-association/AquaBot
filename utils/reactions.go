@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
-
-	"github.com/bwmarrin/discordgo"
+	"github.com/order-of-axis-association/AquaBot/types"
 )
 
 // Must provide fallback_emoji_unicode as a unicde symbol
-func ApplyReaction(emoji_name string, fallback_emoji_unicode string, s *discordgo.Session, m *discordgo.MessageCreate) {
-	c, err := s.State.Channel(m.ChannelID)
+func ApplyReaction(emoji_name string, fallback_emoji_unicode string, state types.MessageState) {
+	m := state.M
+	s := state.S
+	c, err := state.S.State.Channel(m.ChannelID)
 	if err != nil {
 		fmt.Println("Could not find channel by ID:", err)
 		return
@@ -35,6 +36,6 @@ func ApplyReaction(emoji_name string, fallback_emoji_unicode string, s *discordg
 	}
 }
 
-func ApplyErrorReaction(s *discordgo.Session, m *discordgo.MessageCreate) {
-	ApplyReaction("error", "⁉", s, m)
+func ApplyErrorReaction(state types.MessageState) {
+	ApplyReaction("error", "⁉", state)
 }
