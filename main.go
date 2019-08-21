@@ -15,6 +15,7 @@ import (
 
 	"github.com/order-of-axis-association/AquaBot/argparse"
 	"github.com/order-of-axis-association/AquaBot/autodelete"
+	"github.com/order-of-axis-association/AquaBot/cleverbot"
 	"github.com/order-of-axis-association/AquaBot/config"
 	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/triggers"
@@ -24,24 +25,25 @@ import (
 )
 
 func init() {
-	flag.StringVar(&token, "t", "", "Bot Token")
+	flag.StringVar(&TOKEN, "t", "", "Bot Token")
 	flag.Parse()
 }
 
-var global_state = types.G_State{}
+var G_STATE = types.G_State{}
+var CBPAYLOAD_CHAN = make(chan types.CBPayload)
 
-var token string
-var buffer = make([][]byte, 0)
+var TOKEN string
+var BUFFER = make([][]byte, 0)
 
 func main() {
 
-	if token == "" {
+	if TOKEN == "" {
 		fmt.Println("No token provided. Please run: aqua -t <bot token>")
 		return
 	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + token)
+	dg, err := discordgo.New("Bot " + TOKEN)
 	if err != nil {
 		fmt.Println("Error creating Discord session: ", err)
 		return
@@ -65,17 +67,20 @@ func main() {
 	// Create DB connection
 	dsn := db.BuildCloudSQLDSN()
 	gorm_db, err := gorm.Open("mysql", dsn)
-	global_state.DBConn = gorm_db
+	G_STATE.DBConn = gorm_db
 	fmt.Println("DB err: ", err)
-	fmt.Println("dbconn: %+v", global_state.DBConn)
+	fmt.Println("dbconn: %+v", G_STATE.DBConn)
 
-	db.Migrate(global_state)
+	db.Migrate(G_STATE)
 
 	// Start github webhook listener server
 	go webhooks.InitWebhookServer(dg)
 
 	// Start auto message deleter
-	go autodelete.AutoDeleter(dg, global_state)
+	go autodelete.AutoDeleter(dg, G_STATE)
+
+	// Start Cleverbot "daemon".
+	go cb.StartCBDaemon(G_STATE, CBPAYLOAD_CHAN)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Aqua is now running.  Press CTRL-C to exit.")
@@ -165,9 +170,23 @@ func routeAutoTriggers(message string, state types.MessageState) {
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
 		if re.MatchString(message) {
-			f.(func(string, types.MessageState))(
-				message,
-				state)
+			// This is really disgusting.
+			// TODO: Need to figure out a cleaner way to pass additional chan types.CBPayload arg
+			// to the cleverbot invocation function.
+			// Questions: Do I prefer a consistent triggerfunc signature? Should CB be a one-off function? The invocation via regex trigger fits nicely tho.
+			// For the love of god please clean me up eventually.
+			if (strings.Contains(message, "<@603252075006001152>")) {
+				fmt.Sprintln("Sending message, '%s' on CBPayload channel...", message)
+				f.(func(string, types.MessageState, chan types.CBPayload))(
+					message,
+					state,
+					CBPAYLOAD_CHAN,
+				)
+			} else {
+				f.(func(string, types.MessageState))(
+					message,
+					state)
+			}
 		}
 	}
 }
@@ -177,10 +196,10 @@ func routeAutoTriggers(message string, state types.MessageState) {
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Imports will import new records into db so we have a corresponding match
 	// These do nothing beyond ensuring a single record exists in the DB for each corresponding entity.
-	db.ImportGuild(m.GuildID, global_state)
-	db.ImportChannel(m.ChannelID, global_state)
-	db.ImportUser(m.Author, global_state)
-	db.ImportUsers(m.Mentions, global_state)
+	db.ImportGuild(m.GuildID, G_STATE)
+	db.ImportChannel(m.ChannelID, G_STATE)
+	db.ImportUser(m.Author, G_STATE)
+	db.ImportUsers(m.Mentions, G_STATE)
 
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
@@ -191,7 +210,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	state := types.MessageState{
 		S: s,
 		M: m,
-		G: &global_state,
+		G: &G_STATE,
 	}
 
 	// Command invocation

@@ -9,5 +9,6 @@ import (
 // As it currently stands, there's only ever one session so any given discordgo.Session in
 // the event handlers SHOULD be the "global" session but...
 type G_State struct {
+	CBChan *chan CBPayload
 	DBConn *gorm.DB
 }
