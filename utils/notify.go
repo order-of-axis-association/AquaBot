@@ -39,7 +39,7 @@ func TempSay(message string, state types.MessageState) error {
 	tempmessage := db.TempMessage{
 		MessageId: msg.ID,
 		ChannelId: msg.ChannelID,
-		Length: 15,
+		Length:    15,
 	}
 	if err := state.G.DBConn.Create(&tempmessage).Error; err != nil {
 		return err

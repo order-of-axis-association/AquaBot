@@ -1,8 +1,8 @@
 package autodelete
 
 import (
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 

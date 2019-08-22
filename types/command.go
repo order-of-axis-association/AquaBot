@@ -1,12 +1,13 @@
 package types
 
 type Command struct {
-	Cmd		string // The literal string to invoke this command. "ping", "help", "todo", etc
-	Version	string // Arbitrary version. Mostly for dev/debug purposes
+	Cmd     string // The literal string to invoke this command. "ping", "help", "todo", etc
+	Version string // Arbitrary version. Mostly for dev/debug purposes
 
-	Func	interface{}
-	Flags	FuncFlags
-	Usage	string // The usage info to be printed for !help
+	Func    interface{}
+	Flags   FuncFlags
+	Usage   string      // The usage info to be printed for !help
+	Configs ConfigFlags // Should be a map of "config key" to either nil or a validation func.
 }
 
 // Usage should have format of

@@ -2,8 +2,10 @@ package db
 
 import (
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
+// These models are valid models to give to $cleartable command
 var StringToModelMap = map[string]interface{}{
 	"guild":   Guild{},
 	"channel": Channel{},
@@ -47,7 +49,7 @@ type Reminder struct {
 
 	UserId   string
 	Message  string
-	RemindAt int // Should be an epoch
+	RemindAt time.Time // Not pointer as not nullable
 	Reminded bool
 }
 
@@ -59,16 +61,17 @@ type Todo struct {
 	Task   string
 
 	Done     bool
-	DoneDate int
+	DoneDate *time.Time
 }
 
 // ---------------------------
 type Config struct {
 	gorm.Model
 
-	ServerId      string
-	ChannelId     string
-	LastUserToSet int
+	GuildId       *string // Pointers because server/channel is optional
+	ChannelId     *string
+	LastUserToSet string
+	LastUpdated   time.Time // Not pointer because not nullable
 
 	ConfigName  string
 	ConfigValue string
@@ -78,7 +81,7 @@ type Config struct {
 type TempMessage struct {
 	gorm.Model
 
-	MessageId	string
-	ChannelId	string
-	Length		int // Num of seconds to keep message up
+	MessageId string
+	ChannelId string
+	Length    int // Num of seconds to keep message up
 }

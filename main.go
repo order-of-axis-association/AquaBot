@@ -113,7 +113,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // where invocation requires prepending the entire message with a !
 // These will naturally not have a types.CmdArgs due to the lack of a "command" input
 func routeMessageFunc(message string, state types.MessageState) {
-	fmt.Println("Starting route logic for: "+message)
+	fmt.Println("Starting route logic for: " + message)
 	for _, func_config := range config.EnabledFuncPackages {
 		commands := func_config.Commands
 		prefix := func_config.Prefix
@@ -150,7 +150,7 @@ func routeMessageFunc(message string, state types.MessageState) {
 					state)
 
 				if func_err != nil {
-					msg := fmt.Sprintf("[Error][Func: %s@ver%s] %s", prefix+cmd_args.Cmd , version, func_err.Error())
+					msg := fmt.Sprintf("[Error][Func: %s@ver%s] %s", prefix+cmd_args.Cmd, version, func_err.Error())
 					utils.Error(msg, state)
 				}
 			}
@@ -175,7 +175,7 @@ func routeAutoTriggers(message string, state types.MessageState) {
 			// to the cleverbot invocation function.
 			// Questions: Do I prefer a consistent triggerfunc signature? Should CB be a one-off function? The invocation via regex trigger fits nicely tho.
 			// For the love of god please clean me up eventually.
-			if (strings.Contains(message, "<@603252075006001152>")) {
+			if strings.Contains(message, "<@603252075006001152>") {
 				fmt.Sprintln("Sending message, '%s' on CBPayload channel...", message)
 				f.(func(string, types.MessageState, chan types.CBPayload))(
 					message,

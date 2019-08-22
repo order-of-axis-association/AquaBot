@@ -7,8 +7,8 @@ import (
 var package_prefix = "!"
 
 var Config = types.FuncPackageConfig{
-	Prefix:   package_prefix,
-	Commands: []types.Command {
+	Prefix: package_prefix,
+	Commands: []types.Command{
 		Ping,
 		Pong,
 		Todo,

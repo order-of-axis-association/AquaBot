@@ -7,14 +7,13 @@ import (
 	_ "github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
-
 )
 
-var CheckTable = types.Command {
-	Cmd: "checktable",
+var CheckTable = types.Command{
+	Cmd:     "checktable",
 	Version: "0.0.1",
 
-	Func: CheckTableFunc,
+	Func:  CheckTableFunc,
 	Flags: nil,
 	Usage: "",
 }

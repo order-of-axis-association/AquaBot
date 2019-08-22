@@ -22,7 +22,7 @@ func IsAdmin(state types.MessageState) (bool, error) {
 		"Remi#5619",
 	}
 
-	author_id_string := state.M.Author.Username + "#" + state.M.Author.Discriminator
+	author_id_string := state.M.Author.String()
 
 	fmt.Println(author_id_string)
 

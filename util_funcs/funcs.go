@@ -6,11 +6,11 @@ import (
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
 
-var Ping = types.Command {
-	Cmd: "ping",
+var Ping = types.Command{
+	Cmd:     "ping",
 	Version: "1.0.0",
 
-	Func: PingFunc,
+	Func:  PingFunc,
 	Flags: nil,
 	Usage: "",
 }
@@ -19,11 +19,11 @@ func PingFunc(cmd_args types.CmdArgs, state types.MessageState) error {
 	return utils.TempSay("Pong!", state)
 }
 
-var Pong = types.Command {
-	Cmd: "pong",
+var Pong = types.Command{
+	Cmd:     "pong",
 	Version: "1.0.0",
 
-	Func: PongFunc,
+	Func:  PongFunc,
 	Flags: nil,
 	Usage: "",
 }

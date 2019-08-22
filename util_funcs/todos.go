@@ -2,37 +2,36 @@ package util_funcs
 
 import (
 	_ "errors"
-	"strings"
+	"fmt"
 	"regexp"
 	"strconv"
-	"fmt"
+	"strings"
 
 	"github.com/order-of-axis-association/AquaBot/db"
 	"github.com/order-of-axis-association/AquaBot/types"
 	"github.com/order-of-axis-association/AquaBot/utils"
-
 )
 
-var Todo = types.Command {
-	Cmd: "todo",
+var Todo = types.Command{
+	Cmd:     "todo",
 	Version: "0.0.1",
 
-	Func: TodoFunc,
+	Func:  TodoFunc,
 	Flags: nil,
 	Usage: TodoUsage,
 }
 
 var TodoUsage = `
-!todo
+todo
 	- Lists all current todos.
 
-!todo list
+todo list
 	- Same as above
 
-!todo add <msg>
+todo add <msg>
 	- Add <msg> to your todo list
 
-!todo rem <numerical_id>
+todo rem <numerical_id>
 	- Given the todo ID given in '!todo list', will delete corresponding entry.
 	  Eg, if you have three todos listed as 1), 2) and 3) and
 	  you want to delete the middle todo, one would use
@@ -49,7 +48,7 @@ func TodoFunc(cmd_args types.CmdArgs, state types.MessageState) error {
 	first_arg := pos_args[0]
 	remaining_args := strings.Join(pos_args[1:], " ")
 
-	if first_arg == "list" {
+	if utils.StrContains(first_arg, []string{"list"}) {
 		return displayAllTodos(state)
 	} else if utils.StrContains(first_arg, []string{"add", "create"}) {
 		return addTodo(remaining_args, state)
@@ -74,7 +73,7 @@ func displayAllTodos(state types.MessageState) error {
 	msg := "Your todos are...\n\n"
 
 	for index, todo := range todos {
-		msg += fmt.Sprintf("**%d)** %s - _Added on %s_\n", index + 1, todo.Task, todo.CreatedAt)
+		msg += fmt.Sprintf("**%d)** %s - _Added on %s_\n", index+1, todo.Task, todo.CreatedAt)
 	}
 
 	utils.TempSay(msg, state)
@@ -82,17 +81,16 @@ func displayAllTodos(state types.MessageState) error {
 	return nil
 }
 
-
 func addTodo(task string, state types.MessageState) error {
 	if task == "" {
 		return utils.Error("You must provide text to save as your todo! `!todo add <task>`", state)
 	}
 
 	todo := db.Todo{
-		UserID: state.M.Author.ID,
-		Task: task,
-		Done: false,
-		DoneDate: -1,
+		UserID:   state.M.Author.ID,
+		Task:     task,
+		Done:     false,
+		DoneDate: nil,
 	}
 
 	if err := state.G.DBConn.Create(&todo).Error; err != nil {

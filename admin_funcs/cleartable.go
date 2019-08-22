@@ -9,12 +9,11 @@ import (
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
 
-
-var ClearTable = types.Command {
-	Cmd: "cleartable",
+var ClearTable = types.Command{
+	Cmd:     "cleartable",
 	Version: "0.1.0",
 
-	Func: ClearTableFunc,
+	Func:  ClearTableFunc,
 	Flags: ClearTableFlags(),
 	Usage: ClearTableUsage,
 }

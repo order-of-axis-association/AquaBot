@@ -1,6 +1,6 @@
 package types
 
 type CBPayload struct {
-	Msg			string
-	MsgState	*MessageState
+	Msg      string
+	MsgState *MessageState
 }
