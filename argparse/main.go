@@ -159,7 +159,7 @@ func parsePositionalArgs(cmd_rem []rune) []string {
 // - - - Quoted strings can contain the "other" type of quote inside the quote. Eg, "string with ' single quote"
 func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, error) {
 	// Oof lmao. Maybe I should split this into regular code and not regex.
-	re := regexp.MustCompile(`(?:(?P<shortarg>-[a-zA-Z])(?:[ =](?P<shortvalue>[^- \x60'"]+|'[^']+'|"[^"]+"|\x60[^\x60]+\x60)?)|(?P<longarg>--[a-zA-Z-]+)(?:=(?P<longvalue>[^- \x60'"]+|'[^']+'|"[^"]+"|\x60[^\x60]+\x60))?)`)
+	re := regexp.MustCompile(`(?:(?P<shortarg>-[a-zA-Z])|(?P<longarg>--[a-zA-Z-]+))(?:[ =](?P<value>[^- \x60'"]+|'[^']+'|"[^"]+"|\x60[^\x60]+\x60)?)`)
 
 	short_arg_map := make(map[string]string)
 	long_arg_map := make(map[string]string)
@@ -178,27 +178,23 @@ func parseFlaggedArgs(cmd_rem []rune) (map[string]string, map[string]string, err
 
 		// 2nd index is start of the "shortarg" capgroup.
 		// If this field is -1, that means we have a longarg.
-		// Eg, [1 16 -1 -1 -1 -1 1 10 10 16]
-		// Is the return for parsing the string `--flagged=value`
-		// Eg, [1 17 1 3 4 17 -1 -1 -1 -1]
-		// Is the return for parsing: `-h "short value"`
+		// Eg, [1 16 -1 -1 -1 -1 1 10]
+		// Is the return for parsing the string ` --flagged=value`
+		// Eg, [1 17 1 3 4 17 -1 -1]
+		// Is the return for parsing: ` -h "short value"`
 		if result[2] == -1 {
 			// Long arg
-			k_start = result[6]
-			k_end = result[7]
-			v_start = result[8]
-			v_end = result[9]
-
+			k_start = result[4]
+			k_end = result[5]
 			is_long_arg = true
 		} else if result[6] == -1 {
 			// Short arg
 			k_start = result[2]
 			k_end = result[3]
-			v_start = result[4]
-			v_end = result[5]
-
 			is_long_arg = false
 		}
+		v_start = result[6]
+		v_end = result[7]
 
 		var arg_name, arg_val []rune
 
