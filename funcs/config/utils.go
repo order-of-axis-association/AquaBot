@@ -6,23 +6,23 @@ import (
 
 	"github.com/order-of-axis-association/AquaBot/types"
 
-	"github.com/order-of-axis-association/AquaBot/admin_funcs"
-	"github.com/order-of-axis-association/AquaBot/util_funcs"
-	"github.com/order-of-axis-association/AquaBot/utils"
+    "github.com/order-of-axis-association/AquaBot/funcs/admin"
+    "github.com/order-of-axis-association/AquaBot/funcs/utils"
+    "github.com/order-of-axis-association/AquaBot/utils"
 )
 
 func printErrorAndUsage(error_msg string, state types.MessageState) error {
-	msg := fmt.Sprintf("%s\nCommand usage is: ```%s```", error_msg, ConfigUsage)
-	return utils.TempSay(msg, state)
+    msg := fmt.Sprintf("%s\nCommand usage is: ```%s```", error_msg, ConfigUsage)
+    return utils.TempSay(msg, state)
 }
 
 func getValidConfigKeys() []string {
 	// Cannot include config_funcs.Config because of initialization loops.
 	// config_funcs.Config will be a one-off that's explicitly added.
 	// help_funcs is not included due to import cycles. I _really_ need to find an alternative approach.
-	var EnabledFuncPackages = []types.FuncPackageConfig{
-		admin_funcs.Config,
-		util_funcs.Config,
+	var EnabledFuncPackages = []types.FuncPackageConfig {
+		admin_funcs.NewConfig(),
+		util_funcs.NewConfig(),
 	}
 
 	config_keys := make([]string, 0)
@@ -38,7 +38,7 @@ func getValidConfigKeys() []string {
 	}
 
 	// config_func configs... because initialization loops/import cycles...
-	config_cmds := []types.ConfigFlags{
+	config_cmds := []types.ConfigFlags {
 		ConfigConfigs,
 	}
 
@@ -47,6 +47,7 @@ func getValidConfigKeys() []string {
 			config_keys = append(config_keys, key)
 		}
 	}
+
 
 	return config_keys
 }

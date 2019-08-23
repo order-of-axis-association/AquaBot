@@ -8,10 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/order-of-axis-association/AquaBot/admin_funcs"
-	"github.com/order-of-axis-association/AquaBot/config_funcs"
+	"github.com/order-of-axis-association/AquaBot/funcs/admin"
+	"github.com/order-of-axis-association/AquaBot/funcs/config"
 	"github.com/order-of-axis-association/AquaBot/types"
-	"github.com/order-of-axis-association/AquaBot/util_funcs"
+	"github.com/order-of-axis-association/AquaBot/funcs/utils"
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
 
@@ -33,12 +33,12 @@ help <cmdname>
 `
 
 var ENABLED_PACKAGES = []types.FuncPackageConfig{
-	config_funcs.Config,
-	util_funcs.Config,
+	config_funcs.NewConfig(),
+	util_funcs.NewConfig(),
 }
 
 var ADMIN_PACKAGES = []types.FuncPackageConfig{
-	admin_funcs.Config,
+	admin_funcs.NewConfig(),
 }
 
 func HelpFunc(cmd_args types.CmdArgs, state types.MessageState) error {

@@ -10,7 +10,7 @@ import (
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
 
-var ConfigCmd = types.Command{
+var ConfigCmd = types.Command {
 	Cmd:     "config",
 	Version: "0.0.1",
 

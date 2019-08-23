@@ -10,7 +10,9 @@ var commands = []types.Command{
 	ConfigCmd,
 }
 
-var Config = types.FuncPackageConfig{
-	Prefix:   package_prefix,
-	Commands: commands,
+func NewConfig() types.FuncPackageConfig {
+	return types.FuncPackageConfig {
+		Prefix:   package_prefix,
+		Commands: commands,
+	}
 }
