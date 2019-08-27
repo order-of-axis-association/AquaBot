@@ -1,4 +1,4 @@
-package admin_funcs
+package admin_cmds
 
 import (
 	"fmt"

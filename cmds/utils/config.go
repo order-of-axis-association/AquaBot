@@ -1,18 +1,18 @@
-package config_funcs
+package util_cmds
 
 import (
 	"github.com/order-of-axis-association/AquaBot/types"
 )
 
-var package_prefix = "#"
-
-var commands = []types.Command{
-	ConfigCmd,
-}
+var package_prefix = "!"
 
 func NewConfig() types.FuncPackageConfig {
 	return types.FuncPackageConfig {
-		Prefix:   package_prefix,
-		Commands: commands,
+		Prefix: package_prefix,
+		Commands: []types.Command{
+			Ping,
+			Pong,
+			Todo,
+		},
 	}
 }

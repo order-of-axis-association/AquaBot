@@ -1,4 +1,4 @@
-package config_funcs
+package config_cmds
 
 import (
 	"fmt"
@@ -6,8 +6,9 @@ import (
 
 	"github.com/order-of-axis-association/AquaBot/types"
 
-    "github.com/order-of-axis-association/AquaBot/funcs/admin"
-    "github.com/order-of-axis-association/AquaBot/funcs/utils"
+    "github.com/order-of-axis-association/AquaBot/cmds/admin"
+    "github.com/order-of-axis-association/AquaBot/cmds/utils"
+
     "github.com/order-of-axis-association/AquaBot/utils"
 )
 
@@ -17,12 +18,12 @@ func printErrorAndUsage(error_msg string, state types.MessageState) error {
 }
 
 func getValidConfigKeys() []string {
-	// Cannot include config_funcs.Config because of initialization loops.
-	// config_funcs.Config will be a one-off that's explicitly added.
-	// help_funcs is not included due to import cycles. I _really_ need to find an alternative approach.
+	// Cannot include config_cmds.Config because of initialization loops.
+	// config_cmds.Config will be a one-off that's explicitly added.
+	// help_cmds is not included due to import cycles. I _really_ need to find an alternative approach.
 	var EnabledFuncPackages = []types.FuncPackageConfig {
-		admin_funcs.NewConfig(),
-		util_funcs.NewConfig(),
+		admin_cmds.NewConfig(),
+		util_cmds.NewConfig(),
 	}
 
 	config_keys := make([]string, 0)

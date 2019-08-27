@@ -1,16 +1,16 @@
-package admin_funcs
+package help_cmds
 
 import (
 	"github.com/order-of-axis-association/AquaBot/types"
 )
 
+var package_prefix = "!"
+
 func NewConfig() types.FuncPackageConfig {
 	return types.FuncPackageConfig {
-		Prefix: "$",
-
+		Prefix: package_prefix,
 		Commands: []types.Command{
-			ClearTable,
-			CheckTable,
+			Help,
 		},
 	}
 }

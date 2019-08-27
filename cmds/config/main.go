@@ -1,4 +1,4 @@
-package config_funcs
+package config_cmds
 
 import (
 	"fmt"
@@ -21,9 +21,9 @@ var ConfigCmd = types.Command {
 }
 
 var ConfigUsage string = `
-config add <key> <val>
+config set <key> <val>
 	- Help text
-config rem <key>
+config unset <key>
 	- Help text
 `
 
@@ -39,10 +39,10 @@ func ConfigFunc(cmd_args types.CmdArgs, state types.MessageState) error {
 	}
 	subcommand := strings.ToLower(cmd_args.PosArgs[0])
 
-	if utils.StrContains(subcommand, []string{"add"}) {
-		return addConfig(cmd_args, state)
-	} else if utils.StrContains(subcommand, []string{"remove"}) {
-		return remConfig(cmd_args, state)
+	if utils.StrContains(subcommand, []string{"set"}) {
+		return setConfig(cmd_args, state)
+	} else if utils.StrContains(subcommand, []string{"unset"}) {
+		return unsetConfig(cmd_args, state)
 	} else {
 		return printErrorAndUsage("Invalid subcommand!", state)
 	}
@@ -50,10 +50,10 @@ func ConfigFunc(cmd_args types.CmdArgs, state types.MessageState) error {
 	return nil
 }
 
-func addConfig(cmd_args types.CmdArgs, state types.MessageState) error {
+func setConfig(cmd_args types.CmdArgs, state types.MessageState) error {
 	pos_args := cmd_args.PosArgs
 	if len(pos_args) < 2 {
-		return printErrorAndUsage("Must provide a config", state)
+		return printErrorAndUsage("Must provide a config to modify!", state)
 	}
 
 	config_key := pos_args[1]
@@ -61,18 +61,25 @@ func addConfig(cmd_args types.CmdArgs, state types.MessageState) error {
 
 	fmt.Printf("Valid conf keys: %+v\n", valid_config_keys)
 
+	if len(pos_args) < 3 {
+		return printErrorAndUsage("Must provide a value to set!", state)
+	}
+
 	if utils.StrContains(config_key, valid_config_keys) {
-		return utils.TempSay("Asdf", state)
+		config_val := pos_args[2]
+		return set(config_key, config_val, state)
 	}
 
 	return nil
 }
 
-func remConfig(cmd_args types.CmdArgs, state types.MessageState) error {
+func unsetConfig(cmd_args types.CmdArgs, state types.MessageState) error {
 	return nil
 }
 
-func add(key string, val string, state types.MessageState) error {
+func set(key string, val string, state types.MessageState) error {
+	dbconn := state.G.DBConn
+
 	conf := db.Config{
 		GuildId:       &state.M.GuildID,
 		ChannelId:     &state.M.ChannelID,
@@ -80,7 +87,10 @@ func add(key string, val string, state types.MessageState) error {
 		LastUpdated:   time.Now(),
 
 		ConfigName:  key,
-		ConfigValue: val,
+	}
+
+	if not_found := dbconn.Find(conf).RecordNotFound(); not_found {
+
 	}
 
 	fmt.Printf("%+v\n", conf)

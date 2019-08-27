@@ -3,15 +3,15 @@ package config
 import (
 	"github.com/order-of-axis-association/AquaBot/types"
 
-	"github.com/order-of-axis-association/AquaBot/funcs/admin"
-	"github.com/order-of-axis-association/AquaBot/funcs/config"
-	"github.com/order-of-axis-association/AquaBot/funcs/help"
-	"github.com/order-of-axis-association/AquaBot/funcs/utils"
+	"github.com/order-of-axis-association/AquaBot/cmds/admin"
+	"github.com/order-of-axis-association/AquaBot/cmds/config"
+	"github.com/order-of-axis-association/AquaBot/cmds/help"
+	"github.com/order-of-axis-association/AquaBot/cmds/utils"
 )
 
 var EnabledFuncPackages = []types.FuncPackageConfig{
-	admin_funcs.NewConfig(),
-	config_funcs.NewConfig(),
-	help_funcs.NewConfig(),
-	util_funcs.NewConfig(),
+	admin_cmds.NewConfig(),
+	config_cmds.NewConfig(),
+	help_cmds.NewConfig(),
+	util_cmds.NewConfig(),
 }

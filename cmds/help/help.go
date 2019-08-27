@@ -1,6 +1,6 @@
-package help_funcs
+package help_cmds
 
-// Help is its own package due to circular import dependency issues if we included it in util_funcs
+// Help is its own package due to circular import dependency issues if we included it in util_cmds
 
 import (
 	"fmt"
@@ -8,10 +8,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/order-of-axis-association/AquaBot/funcs/admin"
-	"github.com/order-of-axis-association/AquaBot/funcs/config"
+	"github.com/order-of-axis-association/AquaBot/cmds/admin"
+	"github.com/order-of-axis-association/AquaBot/cmds/config"
+	"github.com/order-of-axis-association/AquaBot/cmds/utils"
+
 	"github.com/order-of-axis-association/AquaBot/types"
-	"github.com/order-of-axis-association/AquaBot/funcs/utils"
 	"github.com/order-of-axis-association/AquaBot/utils"
 )
 
@@ -33,12 +34,12 @@ help <cmdname>
 `
 
 var ENABLED_PACKAGES = []types.FuncPackageConfig{
-	config_funcs.NewConfig(),
-	util_funcs.NewConfig(),
+	config_cmds.NewConfig(),
+	util_cmds.NewConfig(),
 }
 
 var ADMIN_PACKAGES = []types.FuncPackageConfig{
-	admin_funcs.NewConfig(),
+	admin_cmds.NewConfig(),
 }
 
 func HelpFunc(cmd_args types.CmdArgs, state types.MessageState) error {

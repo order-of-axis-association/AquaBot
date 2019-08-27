@@ -1,4 +1,4 @@
-package util_funcs
+package util_cmds
 
 import (
 	_ "fmt"
