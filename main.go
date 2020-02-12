@@ -175,7 +175,7 @@ func routeAutoTriggers(message string, state types.MessageState) {
 			// to the cleverbot invocation function.
 			// Questions: Do I prefer a consistent triggerfunc signature? Should CB be a one-off function? The invocation via regex trigger fits nicely tho.
 			// For the love of god please clean me up eventually.
-			if strings.Contains(message, "<@603252075006001152>") {
+			if strings.Contains(message, "<@!603252075006001152>") {
 				fmt.Sprintln("Sending message, '%s' on CBPayload channel...", message)
 				f.(func(string, types.MessageState, chan types.CBPayload))(
 					message,
