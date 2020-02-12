@@ -34,7 +34,7 @@ func getToken() string {
 }
 
 var QUESTION_REPLACEMENTS map[string]string = map[string]string{
-	`<@!603252075006001152>`: "Cleverbot",
+	`<@\!?603252075006001152>`: "Cleverbot",
 	`(?i)\sAqua\s`:          "Cleverbot",
 }
 

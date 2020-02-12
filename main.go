@@ -169,13 +169,17 @@ func routeAutoTriggers(message string, state types.MessageState) {
 
 	for regex, f := range triggers.FuncMap {
 		re = regexp.MustCompile(regex)
+		fmt.Sprintln("message: %s - regex: %s", message, regex)
 		if re.MatchString(message) {
 			// This is really disgusting.
 			// TODO: Need to figure out a cleaner way to pass additional chan types.CBPayload arg
 			// to the cleverbot invocation function.
 			// Questions: Do I prefer a consistent triggerfunc signature? Should CB be a one-off function? The invocation via regex trigger fits nicely tho.
 			// For the love of god please clean me up eventually.
-			if strings.Contains(message, "<@!603252075006001152>") {
+
+			var aqua_str string = "<@603252075006001152>"
+			fmt.Sprintln("Message is %s - looking for %s", message, aqua_str)
+			if strings.Contains(message, aqua_str) {
 				fmt.Sprintln("Sending message, '%s' on CBPayload channel...", message)
 				f.(func(string, types.MessageState, chan types.CBPayload))(
 					message,
