@@ -177,7 +177,7 @@ func routeAutoTriggers(message string, state types.MessageState) {
 			// Questions: Do I prefer a consistent triggerfunc signature? Should CB be a one-off function? The invocation via regex trigger fits nicely tho.
 			// For the love of god please clean me up eventually.
 
-			var aqua_str string = "<@603252075006001152>"
+			var aqua_str string = "603252075006001152>"
 			fmt.Sprintln("Message is %s - looking for %s", message, aqua_str)
 			if strings.Contains(message, aqua_str) {
 				fmt.Sprintln("Sending message, '%s' on CBPayload channel...", message)
